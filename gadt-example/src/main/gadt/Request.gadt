@@ -2,8 +2,10 @@
 
 package com.theoryinpractise.gadt.examples;
 
+import java.util.Date;
+
 data Request implements [com.theoryinpractise.gadt.Shouter]
-  = GET(path : java.lang.String)
+  = GET(path : java.lang.String, requestedOn: Date)
   | DELETE(path : java.lang.String)
   | POST(path : java.lang.String, body : java.lang.String);
 

@@ -17,9 +17,9 @@ NOTE: There are _no_ run-time dependencies introduced by the GADT Generator proj
 package com.theoryinpractise.gadt.examples;
 
 data Request
-  = GET(path : java.lang.String)
-  | DELETE(path : java.lang.String)
-  | POST(path : java.lang.String, body : java.lang.String);
+  = GET(path : String)
+  | DELETE(path : String)
+  | POST(path : String, body : String);
   
 data Day = Monday() | Tuesday() | Wednesday() | Thursday()
          | Friday() | Saturday() | Sunday();

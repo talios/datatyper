@@ -3,14 +3,15 @@ package com.theoryinpractise.gadt;
 import com.theoryinpractise.gadt.model.DataType;
 import com.theoryinpractise.gadt.model.Field;
 import com.theoryinpractise.gadt.model.Gadt;
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.theoryinpractise.gadt.GadtGenerator.generateJavaForGadt;
@@ -37,17 +38,17 @@ public class GadtTest {
     assertThat(GadtParser.dataType().parse("DataType(name: java.lang.String, age: java.lang.Integer)")).isEqualTo(
         new DataType("DataType", Arrays.asList(new Field("name", string), new Field("age", "java.lang.Integer"))));
 
-    Parser.Reference<String> testPackage = Parser.newReference();
-    testPackage.set(Parsers.constant("com.test"));
+    AtomicReference<String> testPackage = new AtomicReference<>("com.test");
+    AtomicReference<List<String>> testImports = new AtomicReference<>(new ArrayList());
 
-    assertThat(GadtParser.gadt(testPackage).parse("data Type = DataType(name: java.lang.String);").dataTypes()).hasSize(1);
+    assertThat(GadtParser.gadt(testPackage, testImports).parse("data Type = DataType(name: java.lang.String);").dataTypes()).hasSize(1);
 
-    assertThat(GadtParser.gadt(testPackage).parse("data Type = DataType(name: java.lang.String)\n | SecondDataType(age:int);").dataTypes()).hasSize(2);
+    assertThat(GadtParser.gadt(testPackage, testImports).parse("data Type = DataType(name: java.lang.String)\n | SecondDataType(age:int);").dataTypes()).hasSize(2);
 
     String source = "data Type = DataType(name: java.lang.String)\n"
         + "  | SecondDataType(age: Integer);\n\n\n";
 
-    System.out.println(GadtParser.gadt(testPackage).parse(source));
+    System.out.println(GadtParser.gadt(testPackage, testImports).parse(source));
 
     List<Gadt> gadts = GadtParser.gadtFile().parse(new InputStreamReader(GadtTest.class.getResourceAsStream("/Test.gadt")));
 
@@ -66,13 +67,11 @@ public class GadtTest {
     String source = "data Type implements [foo] = DataType(name: java.lang.String)\n"
         + "  | SecondDataType(age: Integer);\n\n\n";
 
-    Parser.Reference<String> testPackage = Parser.newReference();
-    testPackage.set(Parsers.constant("com.test"));
+    AtomicReference<String> testPackage = new AtomicReference<>("com.test");
+    AtomicReference<List<String>> testImports = new AtomicReference<>(new ArrayList());
 
-    System.out.println(GadtParser.gadt(testPackage).parse(source));
+    System.out.println(GadtParser.gadt(testPackage, testImports).parse(source));
 
   }
-
-
 
 }

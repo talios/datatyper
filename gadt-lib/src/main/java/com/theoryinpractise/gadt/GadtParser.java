@@ -9,7 +9,9 @@ import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.pattern.Patterns;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.codehaus.jparsec.Parsers.between;
 import static org.codehaus.jparsec.Scanners.string;
@@ -60,6 +62,10 @@ public final class GadtParser {
                                .optional(new ArrayList<>());
   }
 
+  public static Parser<String> importDecl() {
+    return string("import").next(Scanners.WHITESPACES).next(className()).followedBy(Scanners.isChar(';'));
+  }
+
   public static Parser<Field> field() {
     return Parsers.tuple(label().followedBy(typeSeparator()), className())
                   .map(field -> new Field(field.a, field.b));
@@ -85,26 +91,33 @@ public final class GadtParser {
                                ).followedBy(Scanners.isChar(';').next(delim)));
   }
 
-  public static Parser<Gadt> gadt(Parser.Reference<String> packageName) {
+  public static Parser<Gadt> gadt(AtomicReference<String> packageName, AtomicReference<List<String>> importListRef) {
 
     return delim.next(string("data").next(Scanners.WHITESPACES).next(
         Parsers.tuple(label(), Scanners.WHITESPACES.next(implementsList()),
                       delim.next(dataTypes())
                            .followedBy(delim))
-               .map(gadt -> new Gadt(gadt.a, packageName.get().toString(), gadt.c, gadt.b))));
+               .map(gadt -> new Gadt(gadt.a, packageName.get(), gadt.c, importListRef.get(), new HashSet(gadt.b)))));
 
   }
 
   public static Parser<List<Gadt>> gadtFile() {
-    Parser.Reference<String> pacakgeRef = Parser.newReference();
+    AtomicReference<String> pacakgeRef = new AtomicReference<>();
+    AtomicReference<List<String>> importListRef =  new AtomicReference<>();
 
     Parser<String> packageName = packageDecl().map(pack -> {
-      pacakgeRef.set(Parsers.constant(pack));
+      pacakgeRef.set(pack);
       return pack;
+    });
+    
+    Parser<List<String>> importList = importDecl().many().map(imports -> {
+      importListRef.set(imports);
+      return imports;
     });
 
     return delim.next(packageName)
-                .next(gadt(pacakgeRef).many());
+                .next(delim.next(importList))
+                .next(gadt(pacakgeRef, importListRef).many());
   }
 
 

@@ -55,7 +55,7 @@ public class GadtGenerator {
 
       // For each field, add an argument to the constructor method, and a field to the class.
       for (Field field : dataType.fields()) {
-        ClassName argClass = ClassName.bestGuess(field.type());
+        ClassName argClass = resolveClassNameFor(gadt, field.type());
         fieldNames.add(field.name());
 
         dataTypeConstuctorBuilder.addParameter(argClass, field.name(), Modifier.FINAL);
@@ -63,7 +63,6 @@ public class GadtGenerator {
         dataTypeBuilder.addMethod(MethodSpec.methodBuilder(field.name())
                                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                                             .returns(argClass).build());
-
       }
 
       TypeSpec dataTypeSpec = dataTypeBuilder.build();
@@ -124,6 +123,30 @@ public class GadtGenerator {
                   .build();
 
     gadtTypeBuilder.addMethod(matcherBuilder.build());
+  }
+
+  private static ClassName resolveClassNameFor(Gadt gadt, String classReference) {
+
+    // if full class, just guess
+    if (classReference.contains(".")) {
+      return ClassName.bestGuess(classReference);
+    }
+
+    // else find imported class
+    for (String importedClass : gadt.imports()) {
+      if (importedClass.endsWith(classReference)) {
+        return ClassName.bestGuess(importedClass);
+      }
+    }
+
+    // standard class?
+    try {
+      Class.forName("java.lang." + classReference);
+      return ClassName.get("java.lang", classReference);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException("Undeclared class: " + classReference);
+    }
+
   }
 
   private static ClassName classNameFor(Gadt gadt, DataType dataType) {
