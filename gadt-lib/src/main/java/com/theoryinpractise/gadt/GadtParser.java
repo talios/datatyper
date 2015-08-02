@@ -11,6 +11,7 @@ import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.pattern.Patterns;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.codehaus.jparsec.Parsers.between;
@@ -54,6 +55,14 @@ public final class GadtParser {
     return string("package").next(Scanners.WHITESPACES).next(className()).followedBy(string(";"));
   }
 
+  public static Parser<List<String>> implementsList() {
+    final Parser<List<String>> classNameList = className().sepBy(fieldSeparator())
+                                                          .between(Scanners.isChar('['), Scanners.isChar(']'));
+
+    return string("implements").next(Scanners.WHITESPACES).next(classNameList)
+                               .optional(new ArrayList<>());
+  }
+
   public static Parser<Field> field() {
     return Parsers.tuple(label().followedBy(typeSeparator()), className())
                   .map(field -> ImmutableField.of(field.a, field.b));
@@ -71,20 +80,21 @@ public final class GadtParser {
   public static Parser<List<DataType>> dataTypes() {
     return Scanners.WHITESPACES.optional().next(string("="))
                                .next(Scanners.WHITESPACES)
-                               .next(dataType().sepBy(
+                               .next(dataType().sepBy1(
                                    delim.optional().next(
                                        Parsers.sequence(Parsers.or(Scanners.isChar('\n').next(Scanners.WHITESPACES),
                                                                    Scanners.WHITESPACES.optional()),
                                                         string("|"), Scanners.WHITESPACES.optional()))
-                               ).followedBy(Scanners.isChar(';').next(Scanners.WHITESPACES.many())));
-
+                               ).followedBy(Scanners.isChar(';').next(delim)));
   }
 
   public static Parser<Gadt> gadt(Parser.Reference<String> packageName) {
 
-    return delim.next(string("data").next(Scanners.WHITESPACES)
-                                    .next(Parsers.tuple(label(), Scanners.isChar('\n').optional().next(dataTypes()))
-                                                 .map(gadt -> ImmutableGadt.of(gadt.a, packageName.get().toString(), gadt.b))));
+    return delim.next(string("data").next(Scanners.WHITESPACES).next(
+        Parsers.tuple(label(), Scanners.WHITESPACES.next(implementsList()),
+                      delim.next(dataTypes())
+                           .followedBy(delim))
+               .map(gadt -> ImmutableGadt.of(gadt.a, packageName.get().toString(), gadt.c, gadt.b))));
 
   }
 

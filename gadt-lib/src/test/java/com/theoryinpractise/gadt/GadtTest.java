@@ -14,6 +14,7 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.theoryinpractise.gadt.GadtGenerator.generateJavaForGadt;
+import static com.theoryinpractise.gadt.GadtParser.implementsList;
 
 public class GadtTest {
 
@@ -55,5 +56,23 @@ public class GadtTest {
     }
 
   }
+
+  @Test
+  public void testImplementsClause() {
+    assertThat(implementsList().parse("implements [java.lang.Runnable]")).containsExactly("java.lang.Runnable");
+    assertThat(implementsList().parse("implements [java.lang.Runnable, java.test.Test]")).containsExactly("java.lang.Runnable", "java.test.Test");
+    assertThat(implementsList().parse("")).isEmpty();
+
+    String source = "data Type implements [foo] = DataType(name: java.lang.String)\n"
+        + "  | SecondDataType(age: Integer);\n\n\n";
+
+    Parser.Reference<String> testPackage = Parser.newReference();
+    testPackage.set(Parsers.constant("com.test"));
+
+    System.out.println(GadtParser.gadt(testPackage).parse(source));
+
+  }
+
+
 
 }

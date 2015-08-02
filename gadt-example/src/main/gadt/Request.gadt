@@ -2,7 +2,7 @@
 
 package com.theoryinpractise.gadt.examples;
 
-data Request
+data Request implements [com.theoryinpractise.gadt.Shouter]
   = GET(path : java.lang.String)
   | DELETE(path : java.lang.String)
   | POST(path : java.lang.String, body : java.lang.String);

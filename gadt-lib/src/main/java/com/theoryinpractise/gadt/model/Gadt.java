@@ -20,4 +20,7 @@ public interface Gadt {
   @Value.Parameter
   List<DataType> dataTypes();
 
+  @Value.Parameter
+  List<String> implememts();
+
 }

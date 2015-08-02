@@ -29,6 +29,10 @@ public class GadtGenerator {
     TypeSpec.Builder gadtTypeBuilder = TypeSpec.classBuilder(gadt.name())
                                                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
 
+    for (String implemntsClass : gadt.implememts()) {
+      gadtTypeBuilder.addSuperinterface(ClassName.bestGuess(implemntsClass));
+    }
+
     gadtTypeBuilder.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build());
 
     for (DataType dataType : gadt.dataTypes()) {

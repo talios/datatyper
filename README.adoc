@@ -73,6 +73,20 @@ The constructor methods return their concrete type, allowing local code to easil
 Request.GET("/api/story/32").path()
 ----
 
+### Supporting Super-Type marker interfaces
+
+[source,java]
+----
+data SomeType implements [some.marker.Interface, some.other.Interface]
+  = Value();
+----
+
+Data Type declarations define a list of Java class names that the base class should `implement`. These classes *MUST* be interfaces, and only contain `static` or `default` methods ( otherwise the generated code will be fail to compile ).
+
+[NOTE]
+====
+I really don't like the `[]` style syntax, but as yet I'm not sure yet how to get the  https://github.com/jparsec/jparsec[jparsec] parser library to terminate the CSV list without failing the parse. This is being tracked as https://github.com/talios/javagadt/issues/8[issue #8].
+====
 
 ## Configuring Your Maven Build
 

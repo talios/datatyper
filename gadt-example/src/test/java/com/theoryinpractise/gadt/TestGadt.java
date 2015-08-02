@@ -38,6 +38,8 @@ public class TestGadt {
 
     assertThat(pathLength).isEqualTo(13);
 
+    req.shout();
+
   }
 
 }
