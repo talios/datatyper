@@ -36,7 +36,8 @@ public class GadtTest {
     assertThat(GadtParser.dataType().parse("DataType(name: java.lang.String, age: java.lang.Integer)")).isEqualTo(
         ImmutableDataType.of("DataType", Arrays.asList(ImmutableField.of("name", string), ImmutableField.of("age", "java.lang.Integer"))));
 
-    Parser<String> testPackage = Parsers.constant("com.test");
+    Parser.Reference<String> testPackage = Parser.newReference();
+    testPackage.set(Parsers.constant("com.test"));
 
     assertThat(GadtParser.gadt(testPackage).parse("data Type = DataType(name: java.lang.String);").dataTypes()).hasSize(1);
 

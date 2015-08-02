@@ -25,6 +25,12 @@ public final class GadtParser {
 //    return Scanners.JAVA_LINE_COMMENT.source().map(comment -> comment.substring(3));
 //  }
 
+  static Parser<?> delim = Parsers.or(
+      Scanners.WHITESPACES,
+      Scanners.JAVA_LINE_COMMENT,
+      Scanners.JAVA_BLOCK_COMMENT).skipMany();
+
+
   public static Parser<String> label() {
     return Patterns.regex("[a-z|A-Z]+").toScanner("regex").source();
   }
@@ -51,8 +57,8 @@ public final class GadtParser {
   }
 
   public static Parser<Field> field() {
-    return Parsers.tuple(label(), typeSeparator(), className())
-                  .map(field -> ImmutableField.of(field.a, field.c));
+    return Parsers.tuple(label().followedBy(typeSeparator()), className())
+                  .map(field -> ImmutableField.of(field.a, field.b));
   }
 
   public static Parser<List<Field>> fields() {
@@ -74,20 +80,25 @@ public final class GadtParser {
 
   }
 
-  public static Parser<Gadt> gadt(Parser<String> packageName) {
+  public static Parser<Gadt> gadt(Parser.Reference<String> packageName) {
 
     return Parsers.or(Scanners.isChar('\n'), Scanners.JAVA_LINE_COMMENT).skipMany()
                   .next(string("data").next(Scanners.WHITESPACES)
                                       .next(Parsers.tuple(label(), Scanners.isChar('\n').optional().next(dataTypes()))
-                                                   .map(gadt -> ImmutableGadt.of(gadt.a, packageName.toString(), gadt.b))));
+                                                   .map(gadt -> ImmutableGadt.of(gadt.a, packageName.get().toString(), gadt.b))));
 
   }
 
   public static Parser<List<Gadt>> gadtFile() {
-    Parser<String> packageName = packageDecl();
-    return Parsers.or(Scanners.isChar('\n'), Scanners.JAVA_LINE_COMMENT).skipMany()
-                  .next(packageName)
-                  .next(gadt(packageName).many());
+    Parser.Reference<String> pacakgeRef = Parser.newReference();
+
+    Parser<String> packageName = packageDecl().map(pack -> {
+      pacakgeRef.set(Parsers.constant(pack));
+      return pack;
+    });
+
+    return delim.next(packageName)
+                .next(gadt(pacakgeRef).many());
   }
 
 
