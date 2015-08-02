@@ -3,9 +3,6 @@ package com.theoryinpractise.gadt;
 import com.theoryinpractise.gadt.model.DataType;
 import com.theoryinpractise.gadt.model.Field;
 import com.theoryinpractise.gadt.model.Gadt;
-import com.theoryinpractise.gadt.model.ImmutableDataType;
-import com.theoryinpractise.gadt.model.ImmutableField;
-import com.theoryinpractise.gadt.model.ImmutableGadt;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
@@ -65,7 +62,7 @@ public final class GadtParser {
 
   public static Parser<Field> field() {
     return Parsers.tuple(label().followedBy(typeSeparator()), className())
-                  .map(field -> ImmutableField.of(field.a, field.b));
+                  .map(field -> new Field(field.a, field.b));
   }
 
   public static Parser<List<Field>> fields() {
@@ -74,7 +71,7 @@ public final class GadtParser {
 
   public static Parser<DataType> dataType() {
     return Parsers.tuple(label(), fields())
-                  .map(dataType -> ImmutableDataType.of(dataType.a, dataType.b));
+                  .map(dataType -> new DataType(dataType.a, dataType.b));
   }
 
   public static Parser<List<DataType>> dataTypes() {
@@ -94,7 +91,7 @@ public final class GadtParser {
         Parsers.tuple(label(), Scanners.WHITESPACES.next(implementsList()),
                       delim.next(dataTypes())
                            .followedBy(delim))
-               .map(gadt -> ImmutableGadt.of(gadt.a, packageName.get().toString(), gadt.c, gadt.b))));
+               .map(gadt -> new Gadt(gadt.a, packageName.get().toString(), gadt.c, gadt.b))));
 
   }
 

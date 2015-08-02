@@ -1,20 +1,39 @@
 package com.theoryinpractise.gadt.model;
 
-import org.immutables.value.Value;
-
 import java.util.List;
+import java.util.Objects;
 
-/**
- * Created by amrk on 2/08/15.
- */
-@Value.Immutable
-@Value.Style
-public interface DataType {
+public final class DataType {
 
-  @Value.Parameter
-  String name();
+  private String name;
 
-  @Value.Parameter
-  List<Field> fields();
+  private List<Field> fields;
+
+  public DataType(String name, List<Field> fields) {
+    this.name = name;
+    this.fields = fields;
+  }
+
+  public String name() {
+    return name;
+  }
+
+  public List<Field> fields() {
+    return fields;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    DataType dataType = (DataType) o;
+    return Objects.equals(name, dataType.name) &&
+        Objects.equals(fields, dataType.fields);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, fields);
+  }
 
 }

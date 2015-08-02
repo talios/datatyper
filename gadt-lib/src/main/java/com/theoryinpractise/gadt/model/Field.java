@@ -1,18 +1,38 @@
 package com.theoryinpractise.gadt.model;
 
-import org.immutables.value.Value;
+import java.util.Objects;
 
-/**
- * Created by amrk on 2/08/15.
- */
-@Value.Immutable
-@Value.Style
-public interface Field {
+public final class Field {
 
-  @Value.Parameter
-  String name();
+  private String name;
 
-  @Value.Parameter
-  String type();
+  private String type;
+
+  public Field(String name, String type) {
+    this.name = name;
+    this.type = type;
+  }
+
+  public String name() {
+    return name;
+  }
+
+  public String type() {
+    return type;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Field field = (Field) o;
+    return Objects.equals(name, field.name) &&
+        Objects.equals(type, field.type);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, type);
+  }
 
 }
