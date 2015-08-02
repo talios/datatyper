@@ -1,0 +1,11 @@
+// Standard Data Types to use in the program
+package com.test;
+
+data Type = DataType(name: java.lang.String)
+          | SecondDataType(age: Integer);
+
+data Request
+ = GET(path : java.lang.String, query: java.lang.String)
+ | PUT(path : java.lang.String, body: java.lang.String)
+ | DELETE(path : java.lang.String);
+ 
