@@ -38,7 +38,7 @@ public class GadtGenerator {
       // Create data-type constructor/factory method for each data type
       MethodSpec.Builder dataTypeConstuctorBuilder = MethodSpec.methodBuilder(dataType.name())
                                                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                                                               .returns(gadtClassName);
+                                                               .returns(classNameFor(gadt, dataType));
 
       // Create data type itself
       TypeSpec.Builder dataTypeBuilder = TypeSpec.classBuilder(dataType.name())
