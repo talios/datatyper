@@ -1,4 +1,4 @@
-// Standard Data Types to use in the program
+-- Standard Data Types to use in the program
 package com.test;
 
 data Type = DataType(name: java.lang.String)

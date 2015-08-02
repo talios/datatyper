@@ -1,10 +1,7 @@
-// A simple model for an HTTP based API
+-- A simple model for an HTTP based API
 
 package com.theoryinpractise.gadt.examples;
 
-/**
- * Also support muliline java style comments
- */
 data Request
   = GET(path : java.lang.String)
   | DELETE(path : java.lang.String)

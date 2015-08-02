@@ -27,9 +27,7 @@ public final class GadtParser {
 
   static Parser<?> delim = Parsers.or(
       Scanners.WHITESPACES,
-      Scanners.JAVA_LINE_COMMENT,
-      Scanners.JAVA_BLOCK_COMMENT).skipMany();
-
+      Scanners.HASKELL_LINE_COMMENT).skipMany();
 
   public static Parser<String> label() {
     return Patterns.regex("[a-z|A-Z]+").toScanner("regex").source();
