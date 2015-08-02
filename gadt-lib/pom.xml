@@ -9,11 +9,11 @@
   </parent>
 
   <groupId>com.theoryinpractise</groupId>
-  <artifactId>gadt.lib</artifactId>
+  <artifactId>gadt-lib</artifactId>
   <version>1.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>gadt.lib</name>
+  <name>gadt-lib</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -52,7 +52,5 @@
       <version>0.27</version>
       <scope>test</scope>
     </dependency>
-
-
   </dependencies>
 </project>

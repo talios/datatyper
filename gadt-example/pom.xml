@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.theoryinpractise</groupId>
+    <artifactId>gadt</artifactId>
+    <version>1.0.1-SNAPSHOT</version>
+  </parent>
+  <groupId>com.theoryinpractise.gadt</groupId>
+  <artifactId>gadt-example</artifactId>
+  <version>1.0.1-SNAPSHOT</version>
+  <name>gadt-example</name>
+  <url>http://maven.apache.org</url>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.theoryinpractise.gadt</groupId>
+        <artifactId>gadt-maven-plugin</artifactId>
+        <version>1.0.1-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <id>gadt</id>
+            <goals>
+              <goal>gadt</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <!-- Generated GADT files use this -->
+    <dependency>
+      <groupId>com.google.auto.value</groupId>
+      <artifactId>auto-value</artifactId>
+      <version>1.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.truth</groupId>
+      <artifactId>truth</artifactId>
+      <version>0.27</version>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+</project>

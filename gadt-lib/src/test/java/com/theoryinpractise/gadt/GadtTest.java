@@ -51,7 +51,7 @@ public class GadtTest {
     List<Gadt> gadts = GadtParser.gadtFile().parse(new InputStreamReader(GadtTest.class.getResourceAsStream("/Test.gadt")));
 
     for (Gadt gadt : gadts) {
-      generateJavaForGadt(gadt, System.out);
+      generateJavaForGadt(gadt).writeTo(System.out);
     }
 
   }

@@ -18,8 +18,7 @@ import java.util.List;
  */
 public class GadtGenerator {
 
-  public static void generateJavaForGadt(Gadt gadt, Appendable printStream) throws IOException {
-
+  public static JavaFile generateJavaForGadt(Gadt gadt) throws IOException {
 
     ClassName gadtClassName = ClassName.get(gadt.packageName(), gadt.name());
     ClassName autoValue = ClassName.get("com.google.auto.value", "AutoValue");
@@ -75,10 +74,10 @@ public class GadtGenerator {
     TypeSpec gadtType = gadtTypeBuilder.build();
     // .addMethod(main)
 
-    JavaFile javaFile = JavaFile.builder(gadt.packageName(), gadtType)
+    return JavaFile.builder(gadt.packageName(), gadtType)
                                 .build();
 
-    javaFile.writeTo(printStream);
+
 
   }
 

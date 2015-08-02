@@ -17,7 +17,7 @@ import static org.codehaus.jparsec.Parsers.between;
 import static org.codehaus.jparsec.Scanners.string;
 
 /**
- * Created by amrk on 1/08/15.
+ * Parser for GADT data declarations.
  */
 public final class GadtParser {
 
@@ -74,18 +74,19 @@ public final class GadtParser {
     return Scanners.WHITESPACES.optional().next(string("="))
                                .next(Scanners.WHITESPACES)
                                .next(dataType().sepBy(
-                                   Parsers.sequence(Parsers.or(Scanners.isChar('\n').next(Scanners.WHITESPACES), Scanners.WHITESPACES.optional()),
-                                                    string("|"), Scanners.WHITESPACES.optional())
+                                   delim.optional().next(
+                                       Parsers.sequence(Parsers.or(Scanners.isChar('\n').next(Scanners.WHITESPACES),
+                                                                   Scanners.WHITESPACES.optional()),
+                                                        string("|"), Scanners.WHITESPACES.optional()))
                                ).followedBy(Scanners.isChar(';').next(Scanners.WHITESPACES.many())));
 
   }
 
   public static Parser<Gadt> gadt(Parser.Reference<String> packageName) {
 
-    return Parsers.or(Scanners.isChar('\n'), Scanners.JAVA_LINE_COMMENT).skipMany()
-                  .next(string("data").next(Scanners.WHITESPACES)
-                                      .next(Parsers.tuple(label(), Scanners.isChar('\n').optional().next(dataTypes()))
-                                                   .map(gadt -> ImmutableGadt.of(gadt.a, packageName.get().toString(), gadt.b))));
+    return delim.next(string("data").next(Scanners.WHITESPACES)
+                                    .next(Parsers.tuple(label(), Scanners.isChar('\n').optional().next(dataTypes()))
+                                                 .map(gadt -> ImmutableGadt.of(gadt.a, packageName.get().toString(), gadt.b))));
 
   }
 
