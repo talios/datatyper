@@ -3,7 +3,9 @@ package com.theoryinpractise.gadt;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeVariableName;
 import com.theoryinpractise.gadt.model.DataType;
 import com.theoryinpractise.gadt.model.Field;
 import com.theoryinpractise.gadt.model.Gadt;
@@ -71,14 +73,57 @@ public class GadtGenerator {
 
     }
 
+    generateMatcherInterfaceAndCall(gadtTypeBuilder, gadt);
+
+
     TypeSpec gadtType = gadtTypeBuilder.build();
-    // .addMethod(main)
 
     return JavaFile.builder(gadt.packageName(), gadtType)
-                                .build();
+                   .build();
 
 
+  }
 
+  private static void generateMatcherInterfaceAndCall(TypeSpec.Builder gadtTypeBuilder, Gadt gadt) {
+    // Generate matcher interface
+    final TypeVariableName returnTypeVariable = TypeVariableName.get("Return");
+    TypeSpec.Builder matcherTypeBuilder = TypeSpec.interfaceBuilder("Matcher")
+                                                  .addModifiers(Modifier.PUBLIC)
+                                                  .addTypeVariable(returnTypeVariable);
+    ClassName matcherClassName = ClassName.get(gadt.packageName(), gadt.name() + ".Matcher");
+
+    for (DataType dataType : gadt.dataTypes()) {
+      matcherTypeBuilder.addMethod(MethodSpec.methodBuilder("match")
+                                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                                             .addParameter(classNameFor(gadt, dataType), dataType.name())
+                                             .returns(returnTypeVariable)
+                                             .build());
+    }
+
+    final TypeSpec matcherType = matcherTypeBuilder.build();
+    gadtTypeBuilder.addType(matcherType);
+
+    // add Matcher match method
+    ParameterizedTypeName matcherWithReturnType = ParameterizedTypeName.get(matcherClassName, returnTypeVariable);
+    final MethodSpec.Builder matcherBuilder = MethodSpec.methodBuilder("match")
+                                                        .addModifiers(Modifier.FINAL, Modifier.PUBLIC)
+                                                        .addTypeVariable(returnTypeVariable)
+                                                        .addParameter(matcherWithReturnType, "matcher");
+    for (DataType dataType : gadt.dataTypes()) {
+      final ClassName className = classNameFor(gadt, dataType);
+      matcherBuilder.beginControlFlow("if (this instanceof $T)", className);
+      matcherBuilder.addStatement("return matcher.match(($T) this)", className);
+      matcherBuilder.endControlFlow();
+    }
+    matcherBuilder.addStatement("throw new $T(\"Unexpected $L subclass encountered.\")", IllegalStateException.class, gadt.name());
+    matcherBuilder.returns(returnTypeVariable)
+                  .build();
+
+    gadtTypeBuilder.addMethod(matcherBuilder.build());
+  }
+
+  private static ClassName classNameFor(Gadt gadt, DataType dataType) {
+    return ClassName.get(gadt.packageName(), gadt.name() + "." + dataType.name());
   }
 
 

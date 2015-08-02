@@ -19,6 +19,25 @@ public class TestGadt {
     assertThat(req).isInstanceOf(Request.class);
     assertThat(req).isInstanceOf(Request.GET.class);
 
+    int pathLength = req.match(new Request.Matcher<Integer>() {
+      @Override
+      public Integer match(Request.GET GET) {
+        return GET.path().length();
+      }
+
+      @Override
+      public Integer match(Request.DELETE DELETE) {
+        return DELETE.path().length();
+      }
+
+      @Override
+      public Integer match(Request.POST POST) {
+        return POST.path().length();
+      }
+    });
+
+    assertThat(pathLength).isEqualTo(13);
+
   }
 
 }
