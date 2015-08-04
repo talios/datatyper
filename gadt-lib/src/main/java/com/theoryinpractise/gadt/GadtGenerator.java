@@ -15,6 +15,7 @@ import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Created by amrk on 2/08/15.
@@ -95,6 +96,7 @@ public class GadtGenerator {
     }
 
     generateMatcherInterfaceAndCall(gadtTypeBuilder, gadt);
+    generateFluentMatchingInterfaceAndCall(gadtTypeBuilder, gadt);
 
     TypeSpec gadtType = gadtTypeBuilder.build();
 
@@ -148,6 +150,78 @@ public class GadtGenerator {
                   .build();
 
     gadtTypeBuilder.addMethod(matcherBuilder.build());
+  }
+
+  private static void generateFluentMatchingInterfaceAndCall(TypeSpec.Builder gadtTypeBuilder, Gadt gadt) {
+    final TypeVariableName returnTypeVariable = TypeVariableName.get("Return");
+    TypeSpec.Builder matchingTypeBuilder = TypeSpec.classBuilder("Matching")
+                                                   .addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
+                                                   .addTypeVariable(returnTypeVariable);
+
+    ClassName gadtClassName = ClassName.get(gadt.packageName(), gadt.name());
+    matchingTypeBuilder.addField(gadtClassName, "value", Modifier.PRIVATE);
+    matchingTypeBuilder.addField(returnTypeVariable, "returnValue", Modifier.PRIVATE);
+    matchingTypeBuilder.addMethod(MethodSpec.constructorBuilder()
+                                            .addModifiers(Modifier.PRIVATE)
+                                            .addParameter(gadtClassName, "value", Modifier.FINAL)
+                                            .addStatement("this.value = value")
+                                            .build()
+    );
+
+    ClassName matchingClassName = ClassName.get(gadt.packageName(), gadt.name() + ".Matching");
+
+    ParameterizedTypeName matchingWithReturnType = ParameterizedTypeName.get(matchingClassName, returnTypeVariable);
+
+    gadtTypeBuilder.addMethod(MethodSpec.methodBuilder("matching")
+                                        .addModifiers(Modifier.PUBLIC)
+                                        .addTypeVariable(returnTypeVariable)
+                                        .returns(matchingWithReturnType)
+                                        .addStatement("return new $T(this)", matchingClassName)
+                                        .build());
+
+    for (DataType dataType : gadt.dataTypes()) {
+      final ClassName dataTypeClassName = classNameFor(gadt, dataType);
+      ParameterizedTypeName function = ParameterizedTypeName.get(ClassName.get(Function.class), dataTypeClassName, returnTypeVariable);
+
+      matchingTypeBuilder.addMethod(MethodSpec.methodBuilder(dataType.name())
+                                              .addModifiers(Modifier.PUBLIC)
+                                              .addParameter(function, "fn", Modifier.FINAL)
+                                              .returns(matchingWithReturnType)
+                                              .beginControlFlow("if (this.value instanceof $T)", dataTypeClassName)
+                                              .addStatement("this.returnValue = fn.apply(($T) this.value)", dataTypeClassName)
+                                              .endControlFlow()
+                                              .addStatement("return this")
+                                              .build());
+    }
+
+    // Add partial matching result
+    matchingTypeBuilder.addMethod(MethodSpec.methodBuilder("get")
+                                            .addModifiers(Modifier.PUBLIC)
+                                            .returns(returnTypeVariable)
+                                            .beginControlFlow("if (this.returnValue != null)")
+                                            .addStatement("return this.returnValue")
+                                            .endControlFlow()
+                                            .beginControlFlow("else")
+                                            .addStatement("throw new $T(\"Unmatched value: \" + this.value)", IllegalStateException.class)
+                                            .endControlFlow()
+                                            .build());
+    // Add total matching result
+    matchingTypeBuilder.addMethod(MethodSpec.methodBuilder("orElse")
+                                            .addModifiers(Modifier.PUBLIC)
+                                            .addParameter(returnTypeVariable, "returnValue", Modifier.FINAL)
+                                            .returns(returnTypeVariable)
+                                            .beginControlFlow("if (this.returnValue != null)")
+                                            .addStatement("return this.returnValue")
+                                            .endControlFlow()
+                                            .beginControlFlow("else")
+                                            .addStatement("return returnValue")
+                                            .endControlFlow()
+                                            .build());
+
+    final TypeSpec matchingType = matchingTypeBuilder.build();
+    gadtTypeBuilder.addType(matchingType);
+
+
   }
 
   private static ClassName resolveClassNameFor(Gadt gadt, String classReference) {

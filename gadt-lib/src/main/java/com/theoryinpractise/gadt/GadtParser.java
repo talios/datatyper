@@ -10,7 +10,6 @@ import org.codehaus.jparsec.functors.Pair;
 import org.codehaus.jparsec.pattern.Patterns;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -106,9 +105,9 @@ public final class GadtParser {
 
   }
 
-  private static List<String> copyOfList(List<String> strings) {
+  private static List<String> copyOfList(List<String> originalList) {
     List<String> copiedList = new ArrayList<>();
-    Collections.copy(strings, copiedList);
+    copiedList.addAll(originalList);
     return copiedList;
   }
 
