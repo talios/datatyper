@@ -19,30 +19,20 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>com.theoryinpractise.gadt</groupId>
-        <artifactId>gadt-maven-plugin</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
-        <executions>
-          <execution>
-            <id>gadt</id>
-            <goals>
-              <goal>gadt</goal>
-            </goals>
-          </execution>
-        </executions>
+        <groupId>io.repaint.maven</groupId>
+        <artifactId>tiles-maven-plugin</artifactId>
+        <version>2.2</version>
+        <extensions>true</extensions>
+        <configuration>
+          <tiles>
+            <tile>com.theoryinpractise.gadt:gadt-maven-tile:[1.0.0,2.0.0)</tile>
+          </tiles>
+        </configuration>
       </plugin>
     </plugins>
   </build>
 
   <dependencies>
-    <!-- Generated GADT files use this -->
-    <dependency>
-      <groupId>com.google.auto.value</groupId>
-      <artifactId>auto-value</artifactId>
-      <version>1.1</version>
-      <scope>provided</scope>
-    </dependency>
-
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -55,6 +45,6 @@
       <version>0.27</version>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
+
 </project>
