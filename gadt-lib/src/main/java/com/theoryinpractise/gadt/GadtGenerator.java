@@ -194,6 +194,13 @@ public class GadtGenerator {
                                               .build());
     }
 
+    // Add match check
+    matchingTypeBuilder.addMethod(MethodSpec.methodBuilder("isMatched")
+                                            .addModifiers(Modifier.PUBLIC)
+                                            .returns(boolean.class)
+                                            .addStatement("return this.returnValue != null")
+                                            .build());
+
     // Add partial matching result
     matchingTypeBuilder.addMethod(MethodSpec.methodBuilder("get")
                                             .addModifiers(Modifier.PUBLIC)

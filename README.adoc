@@ -79,11 +79,7 @@ if (matched.isMatched()) {
   int length = matched.get();
 }
 
-int length = req.matching()
-  .GET( get -> get.path().length()
-  .orElse(get -> 0);
-
-int length = req.matching()
+int length = req.<Integer>matching()
   .GET( get -> get.path().length()
   .orElse(0);
 
@@ -151,3 +147,19 @@ NOTE: There are _no_ run-time dependencies introduced by the GADT Generator proj
 
 ### Maven Tiles Usage
 
+[source,xml]
+----
+<plugins>
+  <plugin>
+    <groupId>io.repaint.maven</groupId>
+    <artifactId>tiles-maven-plugin</artifactId>
+    <version>2.2</version>
+    <extensions>true</extensions>
+    <configuration>
+      <tiles>
+        <tile>com.theoryinpractise.gadt:gadt-maven-tile:[1.0.0,2.0.0)</tile>
+      </tiles>
+    </configuration>
+  </plugin>
+</plugins>
+----

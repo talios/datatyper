@@ -40,7 +40,11 @@ public class TestGadt {
 
     // Test for fluent matching
     Request.Matching<String> matching = req.<String>matching().GET(get -> "Hello");
-    assertThat(matching.get()).isEqualTo("Hello");
+    if (matching.isMatched()) {
+      assertThat(matching.get()).isEqualTo("Hello");
+    } else {
+      throw new AssertionError("This should have been matched.");
+    }
 
     // Test for failed matching
     try {
