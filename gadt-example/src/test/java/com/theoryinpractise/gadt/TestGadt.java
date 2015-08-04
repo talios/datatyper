@@ -1,6 +1,5 @@
 package com.theoryinpractise.gadt;
 
-import java.util.Date;
 import com.theoryinpractise.gadt.examples.Request;
 import org.junit.Test;
 
@@ -14,7 +13,7 @@ public class TestGadt {
   @Test
   public void testUsingGadt() {
 
-    Request req = Request.GET("/api/story/32", new Date());
+    Request req = Request.GET("/api/story/32");
 
     assertThat(req.toString()).startsWith("GET{path=/api/story/32");
     assertThat(req).isInstanceOf(Request.class);

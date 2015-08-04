@@ -1,12 +1,27 @@
 -- A simple model for an HTTP based API
-
 package com.theoryinpractise.gadt.examples;
+
+-- By not specifying the return type with "->" for a given case,
+-- the inferred return type should just be the individual case.
+data Request implements [com.theoryinpractise.gadt.Shouter]
+  = GET    (path : String)
+  | DELETE (path : String)
+  | POST   (path : String, body : String);
+
+
+-- By not specifying any arguments for a data type, it is generated as a
+-- singleton instance which could be used in place of standard enums.
+data Day
+  = Monday | Tuesday | Wednesday
+  | Thursday | Friday | Saturday | Sunday;
+
+-- java.lang is "imported" by default, but if you want to use other classes,
+-- simply import them
 
 import java.util.Date;
 
-data Request implements [com.theoryinpractise.gadt.Shouter]
-  = GET(path : java.lang.String, requestedOn: Date)
-  | DELETE(path : java.lang.String)
-  | POST(path : java.lang.String, body : java.lang.String);
-
-data Day = Monday() | Tuesday() | Wednesday() | Thursday() | Friday() | Saturday() | Sunday();
+data Log
+  = info(date: Date, message: String)
+  | debug(date: Date, message: String)
+  | warn(date: Date, message: String)
+  | error(date: Date, message: String);

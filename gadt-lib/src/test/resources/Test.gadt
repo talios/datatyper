@@ -10,3 +10,7 @@ data Request
  = GET(path : String, query: String)
  | PUT(path : String, body: String)
  | DELETE(path : String);
+
+data Day
+  = Monday | Tuesday | Wednesday
+  | Thursday | Friday | Saturday | Sunday;

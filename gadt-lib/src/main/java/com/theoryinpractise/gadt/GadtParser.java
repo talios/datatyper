@@ -6,9 +6,11 @@ import com.theoryinpractise.gadt.model.Gadt;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
+import org.codehaus.jparsec.functors.Pair;
 import org.codehaus.jparsec.pattern.Patterns;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -54,14 +56,6 @@ public final class GadtParser {
     return string("package").next(Scanners.WHITESPACES).next(className()).followedBy(string(";"));
   }
 
-  public static Parser<List<String>> implementsList() {
-    final Parser<List<String>> classNameList = className().sepBy(fieldSeparator())
-                                                          .between(Scanners.isChar('['), Scanners.isChar(']'));
-
-    return string("implements").next(Scanners.WHITESPACES).next(classNameList)
-                               .optional(new ArrayList<>());
-  }
-
   public static Parser<String> importDecl() {
     return string("import").next(Scanners.WHITESPACES).next(className()).followedBy(Scanners.isChar(';'));
   }
@@ -81,43 +75,67 @@ public final class GadtParser {
   }
 
   public static Parser<List<DataType>> dataTypes() {
-    return Scanners.WHITESPACES.optional().next(string("="))
-                               .next(Scanners.WHITESPACES)
-                               .next(dataType().sepBy1(
-                                   delim.optional().next(
-                                       Parsers.sequence(Parsers.or(Scanners.isChar('\n').next(Scanners.WHITESPACES),
-                                                                   Scanners.WHITESPACES.optional()),
-                                                        string("|"), Scanners.WHITESPACES.optional()))
-                               ).followedBy(Scanners.isChar(';').next(delim)));
+    return Scanners.WHITESPACES
+        .next(dataType().sepBy1(
+            delim.optional().next(
+                Parsers.sequence(delim, string("|"), delim))
+        ).followedBy(Scanners.isChar(';').next(delim)));
   }
 
-  public static Parser<Gadt> gadt(AtomicReference<String> packageName, AtomicReference<List<String>> importListRef) {
+  private static <T> Parser<T> bracketed(Parser<T> parser) {
+    return parser.between(Scanners.isChar('['), Scanners.isChar(']'));
+  }
 
-    return delim.next(string("data").next(Scanners.WHITESPACES).next(
-        Parsers.tuple(label(), Scanners.WHITESPACES.next(implementsList()),
-                      delim.next(dataTypes())
-                           .followedBy(delim))
-               .map(gadt -> new Gadt(gadt.a, packageName.get(), gadt.c, importListRef.get(), new HashSet(gadt.b)))));
+  public static Parser<Gadt> gadt(AtomicReference<String> packageName, Pair<Parser<List<String>>, AtomicReference<List<String>>> importList) {
 
+    final Parser<List<String>> classNameList = className().followedBy(fieldSeparator().optional()).many();
+
+    final Parser<List<String>> implementsClause = string("implements").next(Scanners.WHITESPACES)
+                                                                      .next(bracketed(classNameList))
+                                                                      .followedBy(Scanners.WHITESPACES.next(string("=")));
+
+    final Parser<List<String>> optionalImplementsClause = Parsers.or(Scanners.WHITESPACES.next(string("=")).map(aVoid -> {
+                                                                       return new ArrayList<>();
+                                                                     }),
+                                                                     Scanners.WHITESPACES.next(implementsClause));
+
+    return delim.next(importList.a).next(delim).next(string("data").next(Scanners.WHITESPACES).next(
+        Parsers.tuple(label(), optionalImplementsClause,
+                      dataTypes().followedBy(delim))
+               .map(gadt -> new Gadt(gadt.a, packageName.get(), gadt.c, copyOfList(importList.b.get()), new HashSet(gadt.b)))));
+
+  }
+
+  private static List<String> copyOfList(List<String> strings) {
+    List<String> copiedList = new ArrayList<>();
+    Collections.copy(strings, copiedList);
+    return copiedList;
   }
 
   public static Parser<List<Gadt>> gadtFile() {
     AtomicReference<String> pacakgeRef = new AtomicReference<>();
-    AtomicReference<List<String>> importListRef =  new AtomicReference<>();
 
     Parser<String> packageName = packageDecl().map(pack -> {
       pacakgeRef.set(pack);
       return pack;
     });
-    
-    Parser<List<String>> importList = importDecl().many().map(imports -> {
+
+    Pair<Parser<List<String>>, AtomicReference<List<String>>> importList = buildImportListParser();
+
+    return delim.next(packageName)
+                .next(delim.next(importList.a))
+                .next(gadt(pacakgeRef, importList).many());
+  }
+
+  public static Pair<Parser<List<String>>, AtomicReference<List<String>>> buildImportListParser() {
+    AtomicReference<List<String>> importListRef = new AtomicReference<>();
+
+    final Parser<List<String>> parser = importDecl().many().map(imports -> {
       importListRef.set(imports);
       return imports;
     });
 
-    return delim.next(packageName)
-                .next(delim.next(importList))
-                .next(gadt(pacakgeRef, importListRef).many());
+    return new Pair(parser, importListRef);
   }
 
 

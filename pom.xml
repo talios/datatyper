@@ -16,6 +16,7 @@
   <modules>
     <module>gadt-lib</module>
     <module>gadt-maven-plugin</module>
+    <module>gadt-maven-tile</module>
     <module>gadt-example</module>
   </modules>
 

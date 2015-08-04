@@ -1,6 +1,7 @@
 package com.theoryinpractise.gadt;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -29,20 +30,22 @@ public class GadtGenerator {
     TypeSpec.Builder gadtTypeBuilder = TypeSpec.classBuilder(gadt.name())
                                                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
 
-    for (String implemntsClass : gadt.implememts()) {
-      gadtTypeBuilder.addSuperinterface(ClassName.bestGuess(implemntsClass));
+    for (String implementsClass : gadt.implememts()) {
+      System.out.println(">>> adding super interface: " + implementsClass);
+      gadtTypeBuilder.addSuperinterface(ClassName.bestGuess(implementsClass));
     }
 
     gadtTypeBuilder.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build());
 
     for (DataType dataType : gadt.dataTypes()) {
 
-      ClassName dataTypeClassName = ClassName.get(gadt.packageName(), "AutoValue_" + gadt.name() + "_" + dataType.name());
+      final ClassName dataTypeInstanceClassName = ClassName.get(gadt.packageName(), "AutoValue_" + gadt.name() + "_" + dataType.name());
+      final ClassName dataTypeInterfaceName = classNameFor(gadt, dataType);
 
       // Create data-type constructor/factory method for each data type
       MethodSpec.Builder dataTypeConstuctorBuilder = MethodSpec.methodBuilder(dataType.name())
                                                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                                                               .returns(classNameFor(gadt, dataType));
+                                                               .returns(dataTypeInterfaceName);
 
       // Create data type itself
       TypeSpec.Builder dataTypeBuilder = TypeSpec.classBuilder(dataType.name())
@@ -50,13 +53,9 @@ public class GadtGenerator {
                                                  .addAnnotation(autoValue)
                                                  .superclass(gadtClassName);
 
-      // StringBuilder for constructor args
-      List<String> fieldNames = new ArrayList<>();
-
       // For each field, add an argument to the constructor method, and a field to the class.
       for (Field field : dataType.fields()) {
         ClassName argClass = resolveClassNameFor(gadt, field.type());
-        fieldNames.add(field.name());
 
         dataTypeConstuctorBuilder.addParameter(argClass, field.name(), Modifier.FINAL);
 
@@ -66,18 +65,36 @@ public class GadtGenerator {
       }
 
       TypeSpec dataTypeSpec = dataTypeBuilder.build();
-
-      MethodSpec dataTypeConstuctor = dataTypeConstuctorBuilder
-          .addStatement("return new $T($L)", dataTypeClassName, String.join(", ", fieldNames))
-          .build();
-
-      gadtTypeBuilder.addMethod(dataTypeConstuctor);
       gadtTypeBuilder.addType(dataTypeSpec);
+
+      // Handle singleton?
+      if (dataType.fields().isEmpty()) {
+        // declare singleton
+        gadtTypeBuilder.addField(FieldSpec.builder(dataTypeInterfaceName, dataType.name(), Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                                          .initializer("new $T()", dataTypeInstanceClassName)
+                                          .build());
+
+        // generate accessor method
+        MethodSpec dataTypeConstuctor = dataTypeConstuctorBuilder
+            .addStatement("return $L", dataType.name())
+            .returns(dataTypeInterfaceName)
+            .build();
+
+        gadtTypeBuilder.addMethod(dataTypeConstuctor);
+
+      } else {
+
+        MethodSpec dataTypeConstuctor = dataTypeConstuctorBuilder
+            .addStatement("return new $T($L)", dataTypeInstanceClassName, String.join(", ", liftFieldNames(dataType)))
+            .returns(dataTypeInterfaceName)
+            .build();
+
+        gadtTypeBuilder.addMethod(dataTypeConstuctor);
+      }
 
     }
 
     generateMatcherInterfaceAndCall(gadtTypeBuilder, gadt);
-
 
     TypeSpec gadtType = gadtTypeBuilder.build();
 
@@ -85,6 +102,14 @@ public class GadtGenerator {
                    .build();
 
 
+  }
+
+  private static List<String> liftFieldNames(DataType dataType) {
+    List<String> fieldNames = new ArrayList<>();
+    for (Field field : dataType.fields()) {
+      fieldNames.add(field.name());
+    }
+    return fieldNames;
   }
 
   private static void generateMatcherInterfaceAndCall(TypeSpec.Builder gadtTypeBuilder, Gadt gadt) {
