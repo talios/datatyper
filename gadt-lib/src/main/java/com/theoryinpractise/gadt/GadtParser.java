@@ -76,8 +76,8 @@ public final class GadtParser {
   }
 
   public static Parser<DataType> dataType() {
-    return Parsers.tuple(label(), fields())
-                  .map(dataType -> new DataType(dataType.a, dataType.b));
+    final Parser<List<Field>> fields = fields().optional(new ArrayList<>());
+    return Parsers.tuple(label().followedBy(Scanners.WHITESPACES.optional()), fields).map(dataType -> new DataType(dataType.a, dataType.b));
   }
 
   public static Parser<List<DataType>> dataTypes() {
