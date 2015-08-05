@@ -1,4 +1,6 @@
 # Java GADT Generator
+:toc:
+:toc-placement: preamble
 
 Algebraic Data-Types for Java.
 
@@ -9,7 +11,32 @@ Algebraic Data-Types for Java.
 .Request.gadt
 [source,haskell]
 ----
-include::gadt-example/src/main/gadt/Request.gadt[]
+-- A simple model for an HTTP based API
+package com.theoryinpractise.gadt.examples;
+
+-- By not specifying the return type with "->" for a given case,
+-- the inferred return type should just be the individual case.
+data Request implements [com.theoryinpractise.gadt.Shouter]
+  = GET    (path : String)
+  | DELETE (path : String)
+  | POST   (path : String, body : String);
+
+-- By not specifying any arguments for a data type, it is generated as a
+-- singleton instance which could be used in place of standard enums.
+data Day
+  = Monday | Tuesday | Wednesday
+  | Thursday | Friday | Saturday | Sunday;
+
+-- java.lang is "imported" by default, but if you want to use other classes,
+-- simply import them
+
+import java.util.Date;
+
+data Log
+  = info(date: Date, message: String)
+  | debug(date: Date, message: String)
+  | warn(date: Date, message: String)
+  | error(date: Date, message: String);
 ----
 
 ### Generated Classes
@@ -68,19 +95,21 @@ int pathLength = req.match(new Request.Matcher() {
 
 ----
 
-### Alternate Matchers
+### Fluent Matchers
+
+Java GADT supports an alternate matching style based on a chainable lambda syntax:
 
 [source,java]
 ----
 Request.Matching<Integer> matched = req.matching()
-  .GET( get -> get.path().length();
+  .GET( get -> get.path().length() );
   
 if (matched.isMatched()) {
   int length = matched.get();
 }
 
 int length = req.<Integer>matching()
-  .GET( get -> get.path().length()
+  .GET( get -> get.path().length() )
   .orElse(0);
 
 ----
