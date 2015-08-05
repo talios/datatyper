@@ -16,7 +16,7 @@ package com.theoryinpractise.gadt.examples;
 
 -- By not specifying the return type with "->" for a given case,
 -- the inferred return type should just be the individual case.
-data Request implements [com.theoryinpractise.gadt.Shouter]
+data Request implements (com.theoryinpractise.gadt.Shouter)
   = GET    (path : String)
   | DELETE (path : String)
   | POST   (path : String, body : String);
@@ -123,7 +123,7 @@ The generated `Request.Matching` class is somewhat akin to an `Optional` value, 
 
 [source,java]
 ----
-data SomeType implements [some.marker.Interface, some.other.Interface]
+data SomeType implements (some.marker.Interface, some.other.Interface)
   = Value();
 ----
 

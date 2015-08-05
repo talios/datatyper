@@ -81,8 +81,11 @@ public class GadtTest {
 
   @Test
   public void testImplementsClause() {
-    String source = "data Type implements [foo] = DataType(name: java.lang.String)\n"
-        + "  | SecondDataType(age: Integer);\n\n\n";
+    String source = "" +
+        "data Type\n" +
+        "  implements (foo)" +
+        "  = DataType(name: java.lang.String)\n" +
+        "  | SecondDataType(age: Integer);\n\n\n";
 
     AtomicReference<String> testPackage = new AtomicReference<>("com.test");
     Pair<Parser<List<String>>, AtomicReference<List<String>>> testImports = buildImportListParser();
