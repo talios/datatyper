@@ -25,7 +25,7 @@
         <extensions>true</extensions>
         <configuration>
           <tiles>
-            <tile>com.theoryinpractise.gadt:gadt-maven-tile:[1.0.0,2.0.0)</tile>
+            <tile>com.theoryinpractise.gadt:gadt-maven-tile:1.0.1-SNAPSHOT</tile>
           </tiles>
         </configuration>
       </plugin>
