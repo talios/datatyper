@@ -10,12 +10,11 @@ import com.squareup.javapoet.TypeVariableName;
 import com.theoryinpractise.gadt.model.DataType;
 import com.theoryinpractise.gadt.model.Field;
 import com.theoryinpractise.gadt.model.Gadt;
-
-import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import javax.lang.model.element.Modifier;
 
 /**
  * Created by amrk on 2/08/15.
@@ -176,7 +175,7 @@ public class GadtGenerator {
                                         .addModifiers(Modifier.PUBLIC)
                                         .addTypeVariable(returnTypeVariable)
                                         .returns(matchingWithReturnType)
-                                        .addStatement("return new $T(this)", matchingClassName)
+                                        .addStatement("return new $T(this)", matchingWithReturnType)
                                         .build());
 
     for (DataType dataType : gadt.dataTypes()) {
