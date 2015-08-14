@@ -1,15 +1,12 @@
 language: java
 
-sudo: required
++addons:
++  apt:
++    packages:
++      - oracle-java8-installer
 
-jdk:
-  - oraclejdk8
-
-install: true
-
-script:
-  - sudo apt-get update && sudo apt-get install oracle-java8-installer
-  - java -version
-  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-  - mvn test
-
+ script:
+   - java -version
++  - mvn install -pl gadt-maven-tile
+   - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+   - mvn test
