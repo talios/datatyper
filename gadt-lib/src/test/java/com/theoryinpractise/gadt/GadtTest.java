@@ -34,7 +34,7 @@ public class GadtTest {
   @Test
   public void testSingletonDataTypes() {
     assertThat(GadtParser.dataType().parse("DataType")).isEqualTo(
-        new DataType("DataType", Collections.EMPTY_LIST));
+        new DataType("DataType", Collections.emptyList()));
   }
 
   @Test

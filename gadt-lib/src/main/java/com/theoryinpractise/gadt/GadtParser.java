@@ -94,7 +94,7 @@ public final class GadtParser {
 
     return comments.next(importList.a).next(comments).next(string("data").next(WHITESPACES).next(
         Parsers.tuple(label, optionalImplementsClause, dataTypes()).followedBy(comments)
-               .map(gadt -> new Gadt(gadt.a, packageName.get(), gadt.c, copyOfList(importList.b.get()), new HashSet(gadt.b)))))
+               .map(gadt -> new Gadt(gadt.a, packageName.get(), gadt.c, copyOfList(importList.b.get()), new HashSet<>(gadt.b)))))
         .followedBy(isChar(';').next(comments));
 
   }
@@ -136,7 +136,7 @@ public final class GadtParser {
       return imports;
     });
 
-    return new Pair(parser, importListRef);
+    return new Pair<>(parser, importListRef);
   }
 
 
