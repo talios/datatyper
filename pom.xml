@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.theoryinpractise</groupId>
-  <artifactId>gadt</artifactId>
+  <artifactId>datatyper</artifactId>
   <version>1.0.1-SNAPSHOT</version>
-  <name>gadt</name>
-  <description>GADT Generator for java</description>
+  <name>datatyper</name>
+  <description>DataType Generator for java</description>
   <url>http://github.com</url>
   <packaging>pom</packaging>
 
@@ -14,10 +14,10 @@
   </properties>
 
   <modules>
-    <module>gadt-lib</module>
-    <module>gadt-maven-plugin</module>
-    <module>gadt-maven-tile</module>
-    <module>gadt-example</module>
+    <module>datatyper-lib</module>
+    <module>datatyper-maven-plugin</module>
+    <module>datatyper-maven-tile</module>
+    <module>datatyper-example</module>
   </modules>
 
   <build>

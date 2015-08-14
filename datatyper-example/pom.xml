@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.theoryinpractise</groupId>
+    <artifactId>datatyper</artifactId>
+    <version>1.0.1-SNAPSHOT</version>
+  </parent>
+  <groupId>com.theoryinpractise.datatyper</groupId>
+  <artifactId>datatyper-example</artifactId>
+  <version>1.0.1-SNAPSHOT</version>
+  <name>datatyper-example</name>
+  <url>http://maven.apache.org</url>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>io.repaint.maven</groupId>
+        <artifactId>tiles-maven-plugin</artifactId>
+        <version>2.2</version>
+        <extensions>true</extensions>
+        <configuration>
+          <tiles>
+            <tile>com.theoryinpractise.datatyper:datatyper-maven-tile:1.0.1-SNAPSHOT</tile>
+          </tiles>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.truth</groupId>
+      <artifactId>truth</artifactId>
+      <version>0.27</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+</project>
