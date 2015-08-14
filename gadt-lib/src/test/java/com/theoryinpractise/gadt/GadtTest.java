@@ -1,22 +1,20 @@
 package com.theoryinpractise.gadt;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.theoryinpractise.gadt.GadtGenerator.generateJavaForGadt;
+import static com.theoryinpractise.gadt.GadtParser.buildImportListParser;
 import com.theoryinpractise.gadt.model.DataType;
 import com.theoryinpractise.gadt.model.Field;
 import com.theoryinpractise.gadt.model.Gadt;
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.functors.Pair;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static com.google.common.truth.Truth.assertThat;
-import static com.theoryinpractise.gadt.GadtGenerator.generateJavaForGadt;
-import static com.theoryinpractise.gadt.GadtParser.buildImportListParser;
+import org.codehaus.jparsec.Parser;
+import org.codehaus.jparsec.functors.Pair;
+import org.junit.Test;
 
 public class GadtTest {
 
@@ -24,7 +22,7 @@ public class GadtTest {
 
   @Test
   public void testLabel() {
-    assertThat(GadtParser.label().parse("name")).isEqualTo("name");
+    assertThat(GadtParser.label.parse("name")).isEqualTo("name");
   }
 
   @Test
