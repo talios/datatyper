@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public final class DataSetSet {
+public final class DataTypeContainer {
 
   private String name;
 
@@ -16,7 +16,7 @@ public final class DataSetSet {
 
   private Set<String> implememts;
 
-  public DataSetSet(
+  public DataTypeContainer(
       String name,
       String packageName,
       List<DataType> dataTypes,
@@ -53,12 +53,12 @@ public final class DataSetSet {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    DataSetSet dataSetSet = (DataSetSet) o;
-    return Objects.equals(name, dataSetSet.name)
-        && Objects.equals(packageName, dataSetSet.packageName)
-        && Objects.equals(dataTypes, dataSetSet.dataTypes)
-        && Objects.equals(imports, dataSetSet.imports)
-        && Objects.equals(implememts, dataSetSet.implememts);
+    DataTypeContainer dataTypeContainer = (DataTypeContainer) o;
+    return Objects.equals(name, dataTypeContainer.name)
+        && Objects.equals(packageName, dataTypeContainer.packageName)
+        && Objects.equals(dataTypes, dataTypeContainer.dataTypes)
+        && Objects.equals(imports, dataTypeContainer.imports)
+        && Objects.equals(implememts, dataTypeContainer.implememts);
   }
 
   @Override

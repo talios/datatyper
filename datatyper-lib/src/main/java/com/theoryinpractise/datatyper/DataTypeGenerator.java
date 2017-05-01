@@ -9,7 +9,7 @@ import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import com.theoryinpractise.datatyper.model.DataType;
 import com.theoryinpractise.datatyper.model.Field;
-import com.theoryinpractise.datatyper.model.DataSetSet;
+import com.theoryinpractise.datatyper.model.DataTypeContainer;
 
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
@@ -21,28 +21,32 @@ import java.util.function.Function;
 /** Created by amrk on 2/08/15. */
 public class DataTypeGenerator {
 
-  public static JavaFile generateJavaForGadt(DataSetSet dataSetSet) throws IOException {
+  public static JavaFile generateJavaForTypeContainer(DataTypeContainer dataTypeContainer)
+      throws IOException {
 
-    ClassName gadtClassName = ClassName.get(dataSetSet.packageName(), dataSetSet.name());
+    ClassName gadtClassName =
+        ClassName.get(dataTypeContainer.packageName(), dataTypeContainer.name());
     ClassName autoValue = ClassName.get("com.google.auto.value", "AutoValue");
 
     // top level gadt class
     TypeSpec.Builder gadtTypeBuilder =
-        TypeSpec.classBuilder(dataSetSet.name()).addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
+        TypeSpec.classBuilder(dataTypeContainer.name())
+            .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
 
-    for (String implementsClass : dataSetSet.implememts()) {
-      gadtTypeBuilder.addSuperinterface(resolveClassNameFor(dataSetSet, implementsClass));
+    for (String implementsClass : dataTypeContainer.implememts()) {
+      gadtTypeBuilder.addSuperinterface(resolveClassNameFor(dataTypeContainer, implementsClass));
     }
 
     gadtTypeBuilder.addMethod(
         MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build());
 
-    for (DataType dataType : dataSetSet.dataTypes()) {
+    for (DataType dataType : dataTypeContainer.dataTypes()) {
 
       final ClassName dataTypeInstanceClassName =
           ClassName.get(
-              dataSetSet.packageName(), "AutoValue_" + dataSetSet.name() + "_" + dataType.name());
-      final ClassName dataTypeInterfaceName = classNameFor(dataSetSet, dataType);
+              dataTypeContainer.packageName(),
+              "AutoValue_" + dataTypeContainer.name() + "_" + dataType.name());
+      final ClassName dataTypeInterfaceName = classNameFor(dataTypeContainer, dataType);
 
       // Create data-type constructor/factory method for each data type
       MethodSpec.Builder dataTypeConstuctorBuilder =
@@ -59,7 +63,7 @@ public class DataTypeGenerator {
 
       // For each field, add an argument to the constructor method, and a field to the class.
       for (Field field : dataType.fields()) {
-        ClassName argClass = resolveClassNameFor(dataSetSet, field.type());
+        ClassName argClass = resolveClassNameFor(dataTypeContainer, field.type());
 
         dataTypeConstuctorBuilder.addParameter(argClass, field.name(), Modifier.FINAL);
 
@@ -110,14 +114,14 @@ public class DataTypeGenerator {
       }
     }
 
-    if (dataSetSet.dataTypes().size() > 1) {
-      generateMatcherInterfaceAndCall(gadtTypeBuilder, dataSetSet);
-      generateFluentMatchingInterfaceAndCall(gadtTypeBuilder, dataSetSet);
+    if (dataTypeContainer.dataTypes().size() > 1) {
+      generateMatcherInterfaceAndCall(gadtTypeBuilder, dataTypeContainer);
+      generateFluentMatchingInterfaceAndCall(gadtTypeBuilder, dataTypeContainer);
     }
 
     TypeSpec gadtType = gadtTypeBuilder.build();
 
-    return JavaFile.builder(dataSetSet.packageName(), gadtType).build();
+    return JavaFile.builder(dataTypeContainer.packageName(), gadtType).build();
   }
 
   private static List<String> liftFieldNames(DataType dataType) {
@@ -129,7 +133,7 @@ public class DataTypeGenerator {
   }
 
   private static void generateMatcherInterfaceAndCall(
-      TypeSpec.Builder gadtTypeBuilder, DataSetSet dataSetSet) {
+      TypeSpec.Builder gadtTypeBuilder, DataTypeContainer dataTypeContainer) {
     // Generate matcher interface
     final TypeVariableName returnTypeVariable = TypeVariableName.get("Return");
     TypeSpec.Builder matcherTypeBuilder =
@@ -137,13 +141,13 @@ public class DataTypeGenerator {
             .addModifiers(Modifier.PUBLIC)
             .addTypeVariable(returnTypeVariable);
     ClassName matcherClassName =
-        ClassName.get(dataSetSet.packageName(), dataSetSet.name() + ".Matcher");
+        ClassName.get(dataTypeContainer.packageName(), dataTypeContainer.name() + ".Matcher");
 
-    for (DataType dataType : dataSetSet.dataTypes()) {
+    for (DataType dataType : dataTypeContainer.dataTypes()) {
       matcherTypeBuilder.addMethod(
           MethodSpec.methodBuilder(dataType.name())
               .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-              .addParameter(classNameFor(dataSetSet, dataType), dataType.name())
+              .addParameter(classNameFor(dataTypeContainer, dataType), dataType.name())
               .returns(returnTypeVariable)
               .build());
     }
@@ -159,8 +163,8 @@ public class DataTypeGenerator {
             .addModifiers(Modifier.FINAL, Modifier.PUBLIC)
             .addTypeVariable(returnTypeVariable)
             .addParameter(matcherWithReturnType, "matcher");
-    for (DataType dataType : dataSetSet.dataTypes()) {
-      final ClassName className = classNameFor(dataSetSet, dataType);
+    for (DataType dataType : dataTypeContainer.dataTypes()) {
+      final ClassName className = classNameFor(dataTypeContainer, dataType);
       matcherBuilder.beginControlFlow("if (this instanceof $T)", className);
       matcherBuilder.addStatement("return matcher.$L(($T) this)", dataType.name(), className);
       matcherBuilder.endControlFlow();
@@ -168,21 +172,22 @@ public class DataTypeGenerator {
     matcherBuilder.addStatement(
         "throw new $T(\"Unexpected $L subclass encountered.\")",
         IllegalStateException.class,
-        dataSetSet.name());
+        dataTypeContainer.name());
     matcherBuilder.returns(returnTypeVariable).build();
 
     gadtTypeBuilder.addMethod(matcherBuilder.build());
   }
 
   private static void generateFluentMatchingInterfaceAndCall(
-      TypeSpec.Builder gadtTypeBuilder, DataSetSet dataSetSet) {
+      TypeSpec.Builder gadtTypeBuilder, DataTypeContainer dataTypeContainer) {
     final TypeVariableName returnTypeVariable = TypeVariableName.get("Return");
     TypeSpec.Builder matchingTypeBuilder =
         TypeSpec.classBuilder("Matching")
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
             .addTypeVariable(returnTypeVariable);
 
-    ClassName gadtClassName = ClassName.get(dataSetSet.packageName(), dataSetSet.name());
+    ClassName gadtClassName =
+        ClassName.get(dataTypeContainer.packageName(), dataTypeContainer.name());
     matchingTypeBuilder.addField(gadtClassName, "value", Modifier.PRIVATE);
     matchingTypeBuilder.addField(returnTypeVariable, "returnValue", Modifier.PRIVATE);
     matchingTypeBuilder.addMethod(
@@ -193,7 +198,7 @@ public class DataTypeGenerator {
             .build());
 
     ClassName matchingClassName =
-        ClassName.get(dataSetSet.packageName(), dataSetSet.name() + ".Matching");
+        ClassName.get(dataTypeContainer.packageName(), dataTypeContainer.name() + ".Matching");
 
     ParameterizedTypeName matchingWithReturnType =
         ParameterizedTypeName.get(matchingClassName, returnTypeVariable);
@@ -206,8 +211,8 @@ public class DataTypeGenerator {
             .addStatement("return new $T(this)", matchingWithReturnType)
             .build());
 
-    for (DataType dataType : dataSetSet.dataTypes()) {
-      final ClassName dataTypeClassName = classNameFor(dataSetSet, dataType);
+    for (DataType dataType : dataTypeContainer.dataTypes()) {
+      final ClassName dataTypeClassName = classNameFor(dataTypeContainer, dataType);
       ParameterizedTypeName function =
           ParameterizedTypeName.get(
               ClassName.get(Function.class), dataTypeClassName, returnTypeVariable);
@@ -273,7 +278,8 @@ public class DataTypeGenerator {
     gadtTypeBuilder.addType(matchingType);
   }
 
-  private static ClassName resolveClassNameFor(DataSetSet dataSetSet, String classReference) {
+  private static ClassName resolveClassNameFor(
+      DataTypeContainer dataTypeContainer, String classReference) {
 
     // if full class, just guess
     if (classReference.contains(".")) {
@@ -281,7 +287,7 @@ public class DataTypeGenerator {
     }
 
     // else find imported class
-    for (String importedClass : dataSetSet.imports()) {
+    for (String importedClass : dataTypeContainer.imports()) {
       if (importedClass.endsWith(classReference)) {
         return ClassName.bestGuess(importedClass);
       }
@@ -296,7 +302,8 @@ public class DataTypeGenerator {
     }
   }
 
-  private static ClassName classNameFor(DataSetSet dataSetSet, DataType dataType) {
-    return ClassName.get(dataSetSet.packageName(), dataSetSet.name() + "." + dataType.name());
+  private static ClassName classNameFor(DataTypeContainer dataTypeContainer, DataType dataType) {
+    return ClassName.get(
+        dataTypeContainer.packageName(), dataTypeContainer.name() + "." + dataType.name());
   }
 }

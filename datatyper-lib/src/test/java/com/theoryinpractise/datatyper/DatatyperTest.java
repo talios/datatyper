@@ -2,7 +2,7 @@ package com.theoryinpractise.datatyper;
 
 import com.theoryinpractise.datatyper.model.DataType;
 import com.theoryinpractise.datatyper.model.Field;
-import com.theoryinpractise.datatyper.model.DataSetSet;
+import com.theoryinpractise.datatyper.model.DataTypeContainer;
 import org.jparsec.Parser;
 import org.jparsec.functors.Pair;
 import org.junit.Test;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.theoryinpractise.datatyper.DataTypeGenerator.generateJavaForGadt;
+import static com.theoryinpractise.datatyper.DataTypeGenerator.generateJavaForTypeContainer;
 import static com.theoryinpractise.datatyper.DatatypeParser.buildImportListParser;
 
 public class DatatyperTest {
@@ -85,12 +85,12 @@ public class DatatyperTest {
 
   @Test
   public void testGadtFiles() throws IOException {
-    List<DataSetSet> dataSetSets =
-        DatatypeParser.gadtFile()
+    List<DataTypeContainer> dataTypeContainers =
+        DatatypeParser.typerFile()
             .parse(new InputStreamReader(DatatyperTest.class.getResourceAsStream("/Test.typer")));
 
-    for (DataSetSet dataSetSet : dataSetSets) {
-      generateJavaForGadt(dataSetSet).writeTo(System.out);
+    for (DataTypeContainer dataTypeContainer : dataTypeContainers) {
+      generateJavaForTypeContainer(dataTypeContainer).writeTo(System.out);
     }
   }
 

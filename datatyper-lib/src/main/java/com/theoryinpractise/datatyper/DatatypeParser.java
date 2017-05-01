@@ -2,7 +2,7 @@ package com.theoryinpractise.datatyper;
 
 import com.theoryinpractise.datatyper.model.DataType;
 import com.theoryinpractise.datatyper.model.Field;
-import com.theoryinpractise.datatyper.model.DataSetSet;
+import com.theoryinpractise.datatyper.model.DataTypeContainer;
 import org.jparsec.Parser;
 import org.jparsec.Parsers;
 import org.jparsec.Scanners;
@@ -80,7 +80,7 @@ public final class DatatypeParser {
     return WHITESPACES.optional().next(string(string)).next(WHITESPACES.optional());
   }
 
-  public static Parser<DataSetSet> gadt(
+  public static Parser<DataTypeContainer> gadt(
       AtomicReference<String> packageName,
       Pair<Parser<List<String>>, AtomicReference<List<String>>> importList) {
 
@@ -104,7 +104,7 @@ public final class DatatypeParser {
                         .followedBy(comments)
                         .map(
                             gadt ->
-                                new DataSetSet(
+                                new DataTypeContainer(
                                     gadt.a,
                                     packageName.get(),
                                     gadt.c,
@@ -127,7 +127,7 @@ public final class DatatypeParser {
     }
   }
 
-  public static Parser<List<DataSetSet>> gadtFile() {
+  public static Parser<List<DataTypeContainer>> typerFile() {
     AtomicReference<String> pacakgeRef = new AtomicReference<>();
 
     Parser<String> packageName =
