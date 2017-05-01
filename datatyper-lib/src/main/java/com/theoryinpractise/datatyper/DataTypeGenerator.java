@@ -31,8 +31,7 @@ public class DataTypeGenerator {
         TypeSpec.classBuilder(dataSetSet.name()).addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
 
     for (String implementsClass : dataSetSet.implememts()) {
-      System.out.println(">>> adding super interface: " + implementsClass);
-      gadtTypeBuilder.addSuperinterface(ClassName.bestGuess(implementsClass));
+      gadtTypeBuilder.addSuperinterface(resolveClassNameFor(dataSetSet, implementsClass));
     }
 
     gadtTypeBuilder.addMethod(
