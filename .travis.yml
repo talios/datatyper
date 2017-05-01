@@ -9,6 +9,6 @@ sudo: false
 
  script:
    - java -version
-+  - mvn install -pl gadt-maven-tile
++  - mvn install -pl datatyper-maven-tile
    - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
    - mvn test
