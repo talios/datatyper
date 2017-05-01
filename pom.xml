@@ -4,7 +4,7 @@
 
   <groupId>com.theoryinpractise.datatyper</groupId>
   <artifactId>datatyper</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>datatyper</name>
@@ -29,7 +29,7 @@
   <scm>
     <developerConnection>scm:git:git@github.com:talios/datatyper.git</developerConnection>
     <url>http://github.com/talios/datatyper</url>
-    <tag>datatyper-1.0.1</tag>
+    <tag>HEAD</tag>
   </scm>
   <distributionManagement>
     <repository>
