@@ -1,5 +1,6 @@
 package com.theoryinpractise.gadt;
 
+import com.theoryinpractise.gadt.examples.Customer;
 import com.theoryinpractise.gadt.examples.Request;
 import org.junit.Test;
 
@@ -70,5 +71,11 @@ public class TestGadt {
     assertThat(optionalReturnValue.isPresent()).isFalse();
 
     req.shout();
+  }
+
+  @Test
+  public void testUsingBasicSingleton() {
+    Customer.SimpleCustomer cust = Customer.SimpleCustomer("Test", "Customer");
+    assertThat(cust.firstName()).isEqualTo("Test");
   }
 }

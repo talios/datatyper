@@ -110,8 +110,10 @@ public class DataTypeGenerator {
       }
     }
 
-    generateMatcherInterfaceAndCall(gadtTypeBuilder, dataSetSet);
-    generateFluentMatchingInterfaceAndCall(gadtTypeBuilder, dataSetSet);
+    if (dataSetSet.dataTypes().size() > 1) {
+      generateMatcherInterfaceAndCall(gadtTypeBuilder, dataSetSet);
+      generateFluentMatchingInterfaceAndCall(gadtTypeBuilder, dataSetSet);
+    }
 
     TypeSpec gadtType = gadtTypeBuilder.build();
 
