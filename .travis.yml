@@ -2,13 +2,13 @@ language: java
 
 sudo: false
 
-+addons:
-+  apt:
-+    packages:
-+      - oracle-java8-installer
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
 
  script:
    - java -version
-+  - mvn install -pl datatyper-maven-tile
+   - mvn install -pl datatyper-maven-tile
    - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
    - mvn test
