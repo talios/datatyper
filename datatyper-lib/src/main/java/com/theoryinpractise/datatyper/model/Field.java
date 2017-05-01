@@ -26,13 +26,11 @@ public final class Field {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     Field field = (Field) o;
-    return Objects.equals(name, field.name) &&
-        Objects.equals(type, field.type);
+    return Objects.equals(name, field.name) && Objects.equals(type, field.type);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(name, type);
   }
-
 }

@@ -3,11 +3,11 @@ package com.theoryinpractise.gadt;
 import com.theoryinpractise.gadt.examples.Request;
 import org.junit.Test;
 
+import java.util.Optional;
+
 import static com.google.common.truth.Truth.assertThat;
 
-/**
- * Test class is in a different package to generated files to check visibility constraints.
- */
+/** Test class is in a different package to generated files to check visibility constraints. */
 public class TestGadt {
 
   @Test
@@ -21,22 +21,26 @@ public class TestGadt {
 
     // Test for total matching
 
-    int pathLength = req.match(new Request.Matcher<Integer>() {
-      @Override
-      public Integer match(Request.GET GET) {
-        return GET.path().length();
-      }
+    int pathLength =
+        req.match(
+            new Request.Matcher<Integer>() {
+              @Override
+              public Integer GET(Request.GET GET) {
+                return GET.path().length();
+              }
 
-      @Override
-      public Integer match(Request.DELETE DELETE) {
-        return DELETE.path().length();
-      }
+              @Override
+              public Integer DELETE(Request.DELETE DELETE) {
+                return DELETE.path().length();
+              }
 
-      @Override
-      public Integer match(Request.POST POST) {
-        return POST.path().length();
-      }
-    });
+              @Override
+              public Integer POST(Request.POST POST) {
+                return POST.path().length();
+              }
+            });
+
+    assertThat(pathLength).isEqualTo(13);
 
     // Test for fluent matching
     Request.Matching<String> matching = req.<String>matching().GET(get -> "Hello");
@@ -56,15 +60,15 @@ public class TestGadt {
     }
 
     // Test for total matching
-    String returnValue = req.<String>matching().POST(post -> "Hello")
-                            .orElse("Goodbye");
+    String returnValue = req.<String>matching().POST(post -> "Hello").orElse("Goodbye");
 
     assertThat(returnValue).isEqualTo("Goodbye");
 
-    assertThat(pathLength).isEqualTo(13);
+    // Test for optional matching
+    Optional<String> optionalReturnValue = req.<String>matching().POST(post -> "Hello").find();
+
+    assertThat(optionalReturnValue.isPresent()).isFalse();
 
     req.shout();
-
   }
-
 }

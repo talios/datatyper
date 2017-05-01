@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
-    <groupId>com.theoryinpractise</groupId>
+    <groupId>com.theoryinpractise.datatyper</groupId>
     <artifactId>datatyper</artifactId>
     <version>1.0.1-SNAPSHOT</version>
   </parent>
+
   <groupId>com.theoryinpractise.datatyper</groupId>
   <artifactId>datatyper-maven-tile</artifactId>
   <version>1.0.1-SNAPSHOT</version>
   <packaging>tile</packaging>
-  <name>datatyper-maven-tile</name>
 
+  <name>datatyper-maven-tile</name>
   <description>Java ADT Generator Tile</description>
   <url>https://github.com/talios/javagadt</url>
 
@@ -20,7 +22,7 @@
       <plugin>
         <groupId>io.repaint.maven</groupId>
         <artifactId>tiles-maven-plugin</artifactId>
-        <version>2.2</version>
+        <version>2.10</version>
         <extensions>true</extensions>
         <configuration>
           <buildSmells>dependencies</buildSmells>
@@ -29,4 +31,3 @@
     </plugins>
   </build>
 </project>
-

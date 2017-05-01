@@ -1,38 +1,33 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
-    <groupId>com.theoryinpractise</groupId>
+    <groupId>com.theoryinpractise.datatyper</groupId>
     <artifactId>datatyper</artifactId>
     <version>1.0.1-SNAPSHOT</version>
   </parent>
+
   <groupId>com.theoryinpractise.datatyper</groupId>
   <artifactId>datatyper-example</artifactId>
   <version>1.0.1-SNAPSHOT</version>
+
   <name>datatyper-example</name>
   <url>http://maven.apache.org</url>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>io.repaint.maven</groupId>
-        <artifactId>tiles-maven-plugin</artifactId>
-        <version>2.2</version>
-        <extensions>true</extensions>
-        <configuration>
-          <tiles>
-            <tile>com.theoryinpractise.datatyper:datatyper-maven-tile:1.0.1-SNAPSHOT</tile>
-          </tiles>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
   <dependencies>
+    <!-- Generated DataTyper files use this -->
+    <dependency>
+      <groupId>com.google.auto.value</groupId>
+      <artifactId>auto-value</artifactId>
+      <version>1.3</version>
+      <scope>provided</scope>
+    </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -47,4 +42,21 @@
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.theoryinpractise.datatyper</groupId>
+        <artifactId>datatyper-maven-plugin</artifactId>
+        <version>1.0.1-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <id>datatyper</id>
+            <goals>
+              <goal>datatyper</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

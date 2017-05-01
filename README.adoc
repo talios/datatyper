@@ -1,22 +1,22 @@
-# Java GADT Generator
+# Java ADT Generator
 :toc:
 :toc-placement: preamble
 
 Algebraic Data-Types for Java.
 
-`gadt-maven-plugin` is an http://maven.apache.org[Apache Maven] plugin to generate _immutable_, _algebraic data types_ for use in JDK 8 based projects.
+`datatyper-maven-plugin` is an http://maven.apache.org[Apache Maven] plugin to generate _immutable_, _algebraic data types_ for use in JDK 8 based projects.
 
-## Example GADT File
+## Example DataTyper File
 
-.Request.gadt
+.Request.typer
 [source,haskell]
 ----
 -- A simple model for an HTTP based API
-package com.theoryinpractise.gadt.examples;
+package com.theoryinpractise.typer.examples;
 
 -- By not specifying the return type with "->" for a given case,
 -- the inferred return type should just be the individual case.
-data Request implements (com.theoryinpractise.gadt.Shouter)
+data Request implements (com.theoryinpractise.typer.Shouter)
   = GET    (path : String)
   | DELETE (path : String)
   | POST   (path : String, body : String);
@@ -46,7 +46,7 @@ data Log
 * A _matcher_ interface providing total coverage for each alternative type.
 * A _fluent matching_ class for simple, inline matching.
 
-A top level `abstract` class is generated for each top level datatype, with additional `abstract` subclasses for each individual datatype case, these classes are annotatd with `@AutoValue` and will generate concrete, immutable, private instance classes via the Google Autovalue library.
+A top-level `abstract` class is generated for each datatype, with additional `abstract` subclasses for each individual case, these classes are annotatd with `@AutoValue` and will generate concrete, immutable, private instance classes via the Google Autovalue library.
 
 Static methods on the top level class are provided to construct instances of your dataypes.
 
@@ -97,13 +97,13 @@ int pathLength = req.match(new Request.Matcher() {
 
 ### Fluent Matchers
 
-Java GADT supports an alternate matching style based on a chainable lambda syntax:
+DataTyper supports an alternate matching style based on a fluent lambda syntax:
 
 [source,java]
 ----
 Request.Matching<Integer> matched = req.matching()
   .GET( get -> get.path().length() );
-  
+
 if (matched.isMatched()) {
   int length = matched.get();
 }
@@ -111,6 +111,10 @@ if (matched.isMatched()) {
 int length = req.<Integer>matching()
   .GET( get -> get.path().length() )
   .orElse(0);
+
+Optional<Integer> length = req.<Integer>matching()
+  .GET( get -> get.path().length() )
+  .find();
 
 ----
 
@@ -151,7 +155,7 @@ NOTE: There are _no_ run-time dependencies introduced by the GADT Generator proj
 <plugins>
   <plugin>
     <groupId>com.theoryinpractise.gadt</groupId>
-    <artifactId>gadt-maven-plugin</artifactId>
+    <artifactId>datatyper-maven-plugin</artifactId>
     <version>1.0.1-SNAPSHOT</version>
     <executions>
       <execution>
@@ -168,7 +172,7 @@ NOTE: There are _no_ run-time dependencies introduced by the GADT Generator proj
   <dependency>
     <groupId>com.google.auto.value</groupId>
     <artifactId>auto-value</artifactId>
-    <version>1.1</version>
+    <version>1.3</version>
     <scope>provided</scope>
   </dependency>
 </dependencies>
@@ -182,7 +186,7 @@ NOTE: There are _no_ run-time dependencies introduced by the GADT Generator proj
   <plugin>
     <groupId>io.repaint.maven</groupId>
     <artifactId>tiles-maven-plugin</artifactId>
-    <version>2.2</version>
+    <version>2.10</version>
     <extensions>true</extensions>
     <configuration>
       <tiles>

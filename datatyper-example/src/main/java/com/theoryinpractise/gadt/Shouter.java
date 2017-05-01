@@ -5,5 +5,4 @@ public interface Shouter {
   default void shout() {
     System.out.println("WOAH NELLY!");
   }
-
 }

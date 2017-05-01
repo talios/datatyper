@@ -27,13 +27,11 @@ public final class DataType {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     DataType dataType = (DataType) o;
-    return Objects.equals(name, dataType.name) &&
-        Objects.equals(fields, dataType.fields);
+    return Objects.equals(name, dataType.name) && Objects.equals(fields, dataType.fields);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(name, fields);
   }
-
 }

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public final class Gadt {
+public final class DataSetSet {
 
   private String name;
 
@@ -16,8 +16,12 @@ public final class Gadt {
 
   private Set<String> implememts;
 
-  public Gadt(String name, String packageName, List<DataType> dataTypes, List<String> imports,
-              Set<String> implememts) {
+  public DataSetSet(
+      String name,
+      String packageName,
+      List<DataType> dataTypes,
+      List<String> imports,
+      Set<String> implememts) {
     this.name = name;
     this.packageName = packageName;
     this.dataTypes = dataTypes;
@@ -49,17 +53,16 @@ public final class Gadt {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    Gadt gadt = (Gadt) o;
-    return Objects.equals(name, gadt.name) &&
-        Objects.equals(packageName, gadt.packageName) &&
-        Objects.equals(dataTypes, gadt.dataTypes) &&
-        Objects.equals(imports, gadt.imports) &&
-        Objects.equals(implememts, gadt.implememts);
+    DataSetSet dataSetSet = (DataSetSet) o;
+    return Objects.equals(name, dataSetSet.name)
+        && Objects.equals(packageName, dataSetSet.packageName)
+        && Objects.equals(dataTypes, dataSetSet.dataTypes)
+        && Objects.equals(imports, dataSetSet.imports)
+        && Objects.equals(implememts, dataSetSet.implememts);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(name, packageName, dataTypes, imports, implememts);
   }
-
 }
