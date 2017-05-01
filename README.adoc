@@ -154,14 +154,14 @@ NOTE: There are _no_ run-time dependencies introduced by the GADT Generator proj
 ----
 <plugins>
   <plugin>
-    <groupId>com.theoryinpractise.gadt</groupId>
+    <groupId>com.theoryinpractise.datatyper</groupId>
     <artifactId>datatyper-maven-plugin</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <executions>
       <execution>
-        <id>gadt</id>
+        <id>datatyper</id>
         <goals>
-          <goal>gadt</goal>
+          <goal>datatyper</goal>
         </goals>
       </execution>
     </executions>
@@ -190,7 +190,7 @@ NOTE: There are _no_ run-time dependencies introduced by the GADT Generator proj
     <extensions>true</extensions>
     <configuration>
       <tiles>
-        <tile>com.theoryinpractise.gadt:gadt-maven-tile:[1.0.0,2.0.0)</tile>
+        <tile>com.theoryinpractise.datatyper:datatyper-maven-tile:[1.0.0,2.0.0)</tile>
       </tiles>
     </configuration>
   </plugin>
