@@ -1,0 +1,443 @@
+package com.test;
+
+import com.google.auto.value.AutoValue;
+import java.lang.IllegalStateException;
+import java.lang.Integer;
+import java.lang.String;
+import java.util.Optional;
+import java.util.function.Function;
+
+public abstract class Type {
+  private Type() {
+  }
+
+  public static Type.DataType DataType(final String name) {
+    return new AutoValue_Type_DataType(name);
+  }
+
+  public static Type.SecondDataType SecondDataType(final Integer age) {
+    return new AutoValue_Type_SecondDataType(age);
+  }
+
+  public final <Return> Return match(Type.Matcher<Return> matcher) {
+    if (this instanceof Type.DataType) {
+      return matcher.DataType((Type.DataType) this);
+    }
+    if (this instanceof Type.SecondDataType) {
+      return matcher.SecondDataType((Type.SecondDataType) this);
+    }
+    throw new IllegalStateException("Unexpected Type subclass encountered.");
+  }
+
+  public <Return> Type.Matching<Return> matching() {
+    return new Type.Matching<Return>(this);
+  }
+
+  @AutoValue
+  public abstract static class DataType extends Type {
+    public abstract String name();
+  }
+
+  @AutoValue
+  public abstract static class SecondDataType extends Type {
+    public abstract Integer age();
+  }
+
+  public interface Matcher<Return> {
+    Return DataType(Type.DataType DataType);
+
+    Return SecondDataType(Type.SecondDataType SecondDataType);
+  }
+
+  public static final class Matching<Return> {
+    private Type value;
+
+    private Return returnValue;
+
+    private Matching(final Type value) {
+      this.value = value;
+    }
+
+    public Type.Matching<Return> DataType(final Function<Type.DataType, Return> fn) {
+      if (this.value instanceof Type.DataType) {
+        this.returnValue = fn.apply((Type.DataType) this.value);
+      }
+      return this;
+    }
+
+    public Type.Matching<Return> SecondDataType(final Function<Type.SecondDataType, Return> fn) {
+      if (this.value instanceof Type.SecondDataType) {
+        this.returnValue = fn.apply((Type.SecondDataType) this.value);
+      }
+      return this;
+    }
+
+    public boolean isMatched() {
+      return this.returnValue != null;
+    }
+
+    public Return get() {
+      if (this.returnValue != null) {
+        return this.returnValue;
+      }
+      else {
+        throw new IllegalStateException("Unmatched value: " + this.value);
+      }
+    }
+
+    public Optional<Return> find() {
+      return Optional.ofNullable(this.returnValue);
+    }
+
+    public Return orElse(final Return returnValue) {
+      if (this.returnValue != null) {
+        return this.returnValue;
+      }
+      else {
+        return returnValue;
+      }
+    }
+  }
+}
+
+
+package com.test;
+
+import com.google.auto.value.AutoValue;
+import java.lang.IllegalStateException;
+import java.lang.String;
+import java.util.Optional;
+import java.util.function.Function;
+
+public abstract class Request {
+  private Request() {
+  }
+
+  public static Request.GET GET(final String path, final String query) {
+    return new AutoValue_Request_GET(path, query);
+  }
+
+  public static Request.PUT PUT(final String path, final String body) {
+    return new AutoValue_Request_PUT(path, body);
+  }
+
+  public static Request.DELETE DELETE(final String path) {
+    return new AutoValue_Request_DELETE(path);
+  }
+
+  public final <Return> Return match(Request.Matcher<Return> matcher) {
+    if (this instanceof Request.GET) {
+      return matcher.GET((Request.GET) this);
+    }
+    if (this instanceof Request.PUT) {
+      return matcher.PUT((Request.PUT) this);
+    }
+    if (this instanceof Request.DELETE) {
+      return matcher.DELETE((Request.DELETE) this);
+    }
+    throw new IllegalStateException("Unexpected Request subclass encountered.");
+  }
+
+  public <Return> Request.Matching<Return> matching() {
+    return new Request.Matching<Return>(this);
+  }
+
+  @AutoValue
+  public abstract static class GET extends Request {
+    public abstract String path();
+
+    public abstract String query();
+  }
+
+  @AutoValue
+  public abstract static class PUT extends Request {
+    public abstract String path();
+
+    public abstract String body();
+  }
+
+  @AutoValue
+  public abstract static class DELETE extends Request {
+    public abstract String path();
+  }
+
+  public interface Matcher<Return> {
+    Return GET(Request.GET GET);
+
+    Return PUT(Request.PUT PUT);
+
+    Return DELETE(Request.DELETE DELETE);
+  }
+
+  public static final class Matching<Return> {
+    private Request value;
+
+    private Return returnValue;
+
+    private Matching(final Request value) {
+      this.value = value;
+    }
+
+    public Request.Matching<Return> GET(final Function<Request.GET, Return> fn) {
+      if (this.value instanceof Request.GET) {
+        this.returnValue = fn.apply((Request.GET) this.value);
+      }
+      return this;
+    }
+
+    public Request.Matching<Return> PUT(final Function<Request.PUT, Return> fn) {
+      if (this.value instanceof Request.PUT) {
+        this.returnValue = fn.apply((Request.PUT) this.value);
+      }
+      return this;
+    }
+
+    public Request.Matching<Return> DELETE(final Function<Request.DELETE, Return> fn) {
+      if (this.value instanceof Request.DELETE) {
+        this.returnValue = fn.apply((Request.DELETE) this.value);
+      }
+      return this;
+    }
+
+    public boolean isMatched() {
+      return this.returnValue != null;
+    }
+
+    public Return get() {
+      if (this.returnValue != null) {
+        return this.returnValue;
+      }
+      else {
+        throw new IllegalStateException("Unmatched value: " + this.value);
+      }
+    }
+
+    public Optional<Return> find() {
+      return Optional.ofNullable(this.returnValue);
+    }
+
+    public Return orElse(final Return returnValue) {
+      if (this.returnValue != null) {
+        return this.returnValue;
+      }
+      else {
+        return returnValue;
+      }
+    }
+  }
+}
+
+
+package com.test;
+
+import com.google.auto.value.AutoValue;
+import java.lang.IllegalStateException;
+import java.util.Optional;
+import java.util.function.Function;
+
+public abstract class Day {
+  private static final Day.Monday Monday = new AutoValue_Day_Monday();
+
+  private static final Day.Tuesday Tuesday = new AutoValue_Day_Tuesday();
+
+  private static final Day.Wednesday Wednesday = new AutoValue_Day_Wednesday();
+
+  private static final Day.Thursday Thursday = new AutoValue_Day_Thursday();
+
+  private static final Day.Friday Friday = new AutoValue_Day_Friday();
+
+  private static final Day.Saturday Saturday = new AutoValue_Day_Saturday();
+
+  private static final Day.Sunday Sunday = new AutoValue_Day_Sunday();
+
+  private Day() {
+  }
+
+  public static Day.Monday Monday() {
+    return Monday;
+  }
+
+  public static Day.Tuesday Tuesday() {
+    return Tuesday;
+  }
+
+  public static Day.Wednesday Wednesday() {
+    return Wednesday;
+  }
+
+  public static Day.Thursday Thursday() {
+    return Thursday;
+  }
+
+  public static Day.Friday Friday() {
+    return Friday;
+  }
+
+  public static Day.Saturday Saturday() {
+    return Saturday;
+  }
+
+  public static Day.Sunday Sunday() {
+    return Sunday;
+  }
+
+  public final <Return> Return match(Day.Matcher<Return> matcher) {
+    if (this instanceof Day.Monday) {
+      return matcher.Monday((Day.Monday) this);
+    }
+    if (this instanceof Day.Tuesday) {
+      return matcher.Tuesday((Day.Tuesday) this);
+    }
+    if (this instanceof Day.Wednesday) {
+      return matcher.Wednesday((Day.Wednesday) this);
+    }
+    if (this instanceof Day.Thursday) {
+      return matcher.Thursday((Day.Thursday) this);
+    }
+    if (this instanceof Day.Friday) {
+      return matcher.Friday((Day.Friday) this);
+    }
+    if (this instanceof Day.Saturday) {
+      return matcher.Saturday((Day.Saturday) this);
+    }
+    if (this instanceof Day.Sunday) {
+      return matcher.Sunday((Day.Sunday) this);
+    }
+    throw new IllegalStateException("Unexpected Day subclass encountered.");
+  }
+
+  public <Return> Day.Matching<Return> matching() {
+    return new Day.Matching<Return>(this);
+  }
+
+  @AutoValue
+  public abstract static class Monday extends Day {
+  }
+
+  @AutoValue
+  public abstract static class Tuesday extends Day {
+  }
+
+  @AutoValue
+  public abstract static class Wednesday extends Day {
+  }
+
+  @AutoValue
+  public abstract static class Thursday extends Day {
+  }
+
+  @AutoValue
+  public abstract static class Friday extends Day {
+  }
+
+  @AutoValue
+  public abstract static class Saturday extends Day {
+  }
+
+  @AutoValue
+  public abstract static class Sunday extends Day {
+  }
+
+  public interface Matcher<Return> {
+    Return Monday(Day.Monday Monday);
+
+    Return Tuesday(Day.Tuesday Tuesday);
+
+    Return Wednesday(Day.Wednesday Wednesday);
+
+    Return Thursday(Day.Thursday Thursday);
+
+    Return Friday(Day.Friday Friday);
+
+    Return Saturday(Day.Saturday Saturday);
+
+    Return Sunday(Day.Sunday Sunday);
+  }
+
+  public static final class Matching<Return> {
+    private Day value;
+
+    private Return returnValue;
+
+    private Matching(final Day value) {
+      this.value = value;
+    }
+
+    public Day.Matching<Return> Monday(final Function<Day.Monday, Return> fn) {
+      if (this.value instanceof Day.Monday) {
+        this.returnValue = fn.apply((Day.Monday) this.value);
+      }
+      return this;
+    }
+
+    public Day.Matching<Return> Tuesday(final Function<Day.Tuesday, Return> fn) {
+      if (this.value instanceof Day.Tuesday) {
+        this.returnValue = fn.apply((Day.Tuesday) this.value);
+      }
+      return this;
+    }
+
+    public Day.Matching<Return> Wednesday(final Function<Day.Wednesday, Return> fn) {
+      if (this.value instanceof Day.Wednesday) {
+        this.returnValue = fn.apply((Day.Wednesday) this.value);
+      }
+      return this;
+    }
+
+    public Day.Matching<Return> Thursday(final Function<Day.Thursday, Return> fn) {
+      if (this.value instanceof Day.Thursday) {
+        this.returnValue = fn.apply((Day.Thursday) this.value);
+      }
+      return this;
+    }
+
+    public Day.Matching<Return> Friday(final Function<Day.Friday, Return> fn) {
+      if (this.value instanceof Day.Friday) {
+        this.returnValue = fn.apply((Day.Friday) this.value);
+      }
+      return this;
+    }
+
+    public Day.Matching<Return> Saturday(final Function<Day.Saturday, Return> fn) {
+      if (this.value instanceof Day.Saturday) {
+        this.returnValue = fn.apply((Day.Saturday) this.value);
+      }
+      return this;
+    }
+
+    public Day.Matching<Return> Sunday(final Function<Day.Sunday, Return> fn) {
+      if (this.value instanceof Day.Sunday) {
+        this.returnValue = fn.apply((Day.Sunday) this.value);
+      }
+      return this;
+    }
+
+    public boolean isMatched() {
+      return this.returnValue != null;
+    }
+
+    public Return get() {
+      if (this.returnValue != null) {
+        return this.returnValue;
+      }
+      else {
+        throw new IllegalStateException("Unmatched value: " + this.value);
+      }
+    }
+
+    public Optional<Return> find() {
+      return Optional.ofNullable(this.returnValue);
+    }
+
+    public Return orElse(final Return returnValue) {
+      if (this.returnValue != null) {
+        return this.returnValue;
+      }
+      else {
+        return returnValue;
+      }
+    }
+  }
+}
+
+

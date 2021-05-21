@@ -17,6 +17,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import static com.google.common.truth.Truth.assertThat;
 import static com.theoryinpractise.datatyper.DataTypeGenerator.generateJavaForTypeContainer;
 import static com.theoryinpractise.datatyper.DatatypeParser.buildImportListParser;
+import java.io.StringWriter;
+import java.io.Writer;
+import org.approvaltests.Approvals;
 
 public class DatatyperTest {
 
@@ -89,9 +92,14 @@ public class DatatyperTest {
         DatatypeParser.typerFile()
             .parse(new InputStreamReader(DatatyperTest.class.getResourceAsStream("/Test.typer")));
 
+    Writer writer = new StringWriter();
+
     for (DataTypeContainer dataTypeContainer : dataTypeContainers) {
-      generateJavaForTypeContainer(dataTypeContainer).writeTo(System.out);
+      generateJavaForTypeContainer(dataTypeContainer).writeTo(writer);
+      writer.append("\n\n");
     }
+
+    Approvals.verify(writer.toString());
   }
 
   @Test
