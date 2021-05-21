@@ -33,7 +33,10 @@ public final class DatatypeParser {
   public static Parser<String> label = Patterns.regex("[a-z|A-Z]+").toScanner("regex").source();
 
   public static Parser<String> className =
-      Patterns.regex("[a-z|A-Z][a-z|A-Z|0-9|\\.]+").toScanner("regex").source();
+      Patterns.regex("[a-z|A-Z][a-z|A-Z|0-9|\\.]+").toScanner("class-regex").source();
+
+  public static Parser<String> typeName =
+      Patterns.regex("[a-z|A-Z][<|>|a-z|A-Z|0-9|\\.]+").toScanner("type-regex").source();
 
   public static Parser<Void> separator(char separator) {
     return WHITESPACES.optional().next(isChar(separator)).next(WHITESPACES.optional());
@@ -52,7 +55,7 @@ public final class DatatypeParser {
   }
 
   public static Parser<Field> field() {
-    return Parsers.tuple(label.followedBy(typeSeparator), className)
+    return Parsers.tuple(label.followedBy(typeSeparator), typeName)
         .map(field -> new Field(field.a, field.b));
   }
 

@@ -1,8 +1,6 @@
 -- Standard Data Types to use in the program
 package com.test;
 
-import some.Object;
-
 data Type = DataType(name: String)
           | SecondDataType(age: Integer);
 
@@ -14,3 +12,7 @@ data Request
 data Day
   = Monday | Tuesday | Wednesday
   | Thursday | Friday | Saturday | Sunday;
+
+data GenericAttribute
+  = Empty
+  | Container(value: java.util.Set<String>);

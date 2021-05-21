@@ -1,9 +1,6 @@
 package com.test;
 
 import com.google.auto.value.AutoValue;
-import java.lang.IllegalStateException;
-import java.lang.Integer;
-import java.lang.String;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -11,11 +8,11 @@ public abstract class Type {
   private Type() {
   }
 
-  public static Type.DataType dataType(final String name) {
+  public static Type.DataType dataType(String name) {
     return new AutoValue_Type_DataType(name);
   }
 
-  public static Type.SecondDataType secondDataType(final Integer age) {
+  public static Type.SecondDataType secondDataType(Integer age) {
     return new AutoValue_Type_SecondDataType(age);
   }
 
@@ -104,8 +101,6 @@ public abstract class Type {
 package com.test;
 
 import com.google.auto.value.AutoValue;
-import java.lang.IllegalStateException;
-import java.lang.String;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -113,15 +108,15 @@ public abstract class Request {
   private Request() {
   }
 
-  public static Request.GET GET(final String path, final String query) {
+  public static Request.GET GET(String path, String query) {
     return new AutoValue_Request_GET(path, query);
   }
 
-  public static Request.PUT PUT(final String path, final String body) {
+  public static Request.PUT PUT(String path, String body) {
     return new AutoValue_Request_PUT(path, body);
   }
 
-  public static Request.DELETE DELETE(final String path) {
+  public static Request.DELETE DELETE(String path) {
     return new AutoValue_Request_DELETE(path);
   }
 
@@ -231,7 +226,6 @@ public abstract class Request {
 package com.test;
 
 import com.google.auto.value.AutoValue;
-import java.lang.IllegalStateException;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -408,6 +402,110 @@ public abstract class Day {
     public Day.Matching<Return> Sunday(final Function<Day.Sunday, Return> fn) {
       if (this.value instanceof Day.Sunday) {
         this.returnValue = fn.apply((Day.Sunday) this.value);
+      }
+      return this;
+    }
+
+    public boolean isMatched() {
+      return this.returnValue != null;
+    }
+
+    public Return get() {
+      if (this.returnValue != null) {
+        return this.returnValue;
+      }
+      else {
+        throw new IllegalStateException("Unmatched value: " + this.value);
+      }
+    }
+
+    public Optional<Return> find() {
+      return Optional.ofNullable(this.returnValue);
+    }
+
+    public Return orElse(final Return returnValue) {
+      if (this.returnValue != null) {
+        return this.returnValue;
+      }
+      else {
+        return returnValue;
+      }
+    }
+  }
+}
+
+
+package com.test;
+
+import com.google.auto.value.AutoValue;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+
+public abstract class GenericAttribute {
+  private static final GenericAttribute.Empty Empty = new AutoValue_GenericAttribute_Empty();
+
+  private GenericAttribute() {
+  }
+
+  public static GenericAttribute.Empty empty() {
+    return Empty;
+  }
+
+  public static GenericAttribute.Container container(Set<String> value) {
+    return new AutoValue_GenericAttribute_Container(value);
+  }
+
+  public final <Return> Return match(GenericAttribute.Matcher<Return> matcher) {
+    if (this instanceof GenericAttribute.Empty) {
+      return matcher.empty((GenericAttribute.Empty) this);
+    }
+    if (this instanceof GenericAttribute.Container) {
+      return matcher.container((GenericAttribute.Container) this);
+    }
+    throw new IllegalStateException("Unexpected GenericAttribute subclass encountered.");
+  }
+
+  public <Return> GenericAttribute.Matching<Return> matching() {
+    return new GenericAttribute.Matching<Return>(this);
+  }
+
+  @AutoValue
+  public abstract static class Empty extends GenericAttribute {
+  }
+
+  @AutoValue
+  public abstract static class Container extends GenericAttribute {
+    public abstract Set<String> value();
+  }
+
+  public interface Matcher<Return> {
+    Return empty(GenericAttribute.Empty empty);
+
+    Return container(GenericAttribute.Container container);
+  }
+
+  public static final class Matching<Return> {
+    private GenericAttribute value;
+
+    private Return returnValue;
+
+    private Matching(final GenericAttribute value) {
+      this.value = value;
+    }
+
+    public GenericAttribute.Matching<Return> Empty(
+        final Function<GenericAttribute.Empty, Return> fn) {
+      if (this.value instanceof GenericAttribute.Empty) {
+        this.returnValue = fn.apply((GenericAttribute.Empty) this.value);
+      }
+      return this;
+    }
+
+    public GenericAttribute.Matching<Return> Container(
+        final Function<GenericAttribute.Container, Return> fn) {
+      if (this.value instanceof GenericAttribute.Container) {
+        this.returnValue = fn.apply((GenericAttribute.Container) this.value);
       }
       return this;
     }

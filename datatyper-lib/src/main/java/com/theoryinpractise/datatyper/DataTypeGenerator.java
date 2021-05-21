@@ -5,6 +5,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import com.theoryinpractise.datatyper.model.DataType;
@@ -63,14 +64,14 @@ public class DataTypeGenerator {
 
       // For each field, add an argument to the constructor method, and a field to the class.
       for (Field field : dataType.fields()) {
-        ClassName argClass = resolveClassNameFor(dataTypeContainer, field.type());
+        TypeName argType = resolveClassNameFor(dataTypeContainer, field.type());
 
-        dataTypeConstuctorBuilder.addParameter(argClass, camelCase(field.name()), Modifier.FINAL);
+        dataTypeConstuctorBuilder.addParameter(argType, camelCase(field.name()));
 
         dataTypeBuilder.addMethod(
             MethodSpec.methodBuilder(camelCase(field.name()))
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .returns(argClass)
+                .returns(argType)
                 .build());
       }
 
@@ -121,7 +122,9 @@ public class DataTypeGenerator {
 
     TypeSpec gadtType = gadtTypeBuilder.build();
 
-    return JavaFile.builder(dataTypeContainer.packageName(), gadtType).build();
+    return JavaFile.builder(dataTypeContainer.packageName(), gadtType)
+        .skipJavaLangImports(true)
+        .build();
   }
 
   private static List<String> liftFieldNames(DataType dataType) {
@@ -135,7 +138,7 @@ public class DataTypeGenerator {
   private static void generateMatcherInterfaceAndCall(
       TypeSpec.Builder gadtTypeBuilder, DataTypeContainer dataTypeContainer) {
     // Generate matcher interface
-    final TypeVariableName returnTypeVariable = TypeVariableName.get("Return");
+    TypeVariableName returnTypeVariable = TypeVariableName.get("Return");
     TypeSpec.Builder matcherTypeBuilder =
         TypeSpec.interfaceBuilder("Matcher")
             .addModifiers(Modifier.PUBLIC)
@@ -213,7 +216,7 @@ public class DataTypeGenerator {
             .build());
 
     for (DataType dataType : dataTypeContainer.dataTypes()) {
-      final ClassName dataTypeClassName = classNameFor(dataTypeContainer, dataType);
+      ClassName dataTypeClassName = classNameFor(dataTypeContainer, dataType);
       ParameterizedTypeName function =
           ParameterizedTypeName.get(
               ClassName.get(Function.class), dataTypeClassName, returnTypeVariable);
@@ -279,11 +282,22 @@ public class DataTypeGenerator {
     gadtTypeBuilder.addType(matchingType);
   }
 
-  private static ClassName resolveClassNameFor(
+  private static TypeName resolveClassNameFor(
       DataTypeContainer dataTypeContainer, String classReference) {
 
+    // test for generics - do a half arsed attempt as wacky resolution with javapoet
+    if (classReference.contains("<")) {
+      String[] types = classReference.replaceAll("[<|>|,]", " ").split(" ");
+      ClassName baseClassName = ClassName.bestGuess(types[0]);
+      ClassName[] typeArgs = new ClassName[types.length - 1];
+      for (int i = 1; i < types.length; i++) {
+        typeArgs[i - 1] = ClassName.bestGuess(types[i]);
+      }
+      return ParameterizedTypeName.get(baseClassName, typeArgs);
+    }
+
     // if full class, just guess
-    if (classReference.contains(".") || classReference.contains("<")) {
+    if (classReference.contains(".")) {
       return ClassName.bestGuess(classReference);
     }
 
