@@ -30,6 +30,17 @@ public abstract class Type {
     return new Type.Matching<Return>(this);
   }
 
+  public <Return> Return matching(Function<Type.DataType, Return> dataType,
+      Function<Type.SecondDataType, Return> secondDataType) {
+    if (this instanceof Type.DataType) {
+      return dataType.apply((Type.DataType) this);
+    }
+    if (this instanceof Type.SecondDataType) {
+      return secondDataType.apply((Type.SecondDataType) this);
+    }
+    throw new IllegalStateException("Unexpected Type subclass encountered.");
+  }
+
   @AutoValue
   public abstract static class DataType extends Type {
     public abstract String name();
@@ -135,6 +146,20 @@ public abstract class Request {
 
   public <Return> Request.Matching<Return> matching() {
     return new Request.Matching<Return>(this);
+  }
+
+  public <Return> Return matching(Function<Request.GET, Return> GET,
+      Function<Request.PUT, Return> PUT, Function<Request.DELETE, Return> DELETE) {
+    if (this instanceof Request.GET) {
+      return GET.apply((Request.GET) this);
+    }
+    if (this instanceof Request.PUT) {
+      return PUT.apply((Request.PUT) this);
+    }
+    if (this instanceof Request.DELETE) {
+      return DELETE.apply((Request.DELETE) this);
+    }
+    throw new IllegalStateException("Unexpected Request subclass encountered.");
   }
 
   @AutoValue
@@ -304,6 +329,34 @@ public abstract class Day {
     return new Day.Matching<Return>(this);
   }
 
+  public <Return> Return matching(Function<Day.Monday, Return> monday,
+      Function<Day.Tuesday, Return> tuesday, Function<Day.Wednesday, Return> wednesday,
+      Function<Day.Thursday, Return> thursday, Function<Day.Friday, Return> friday,
+      Function<Day.Saturday, Return> saturday, Function<Day.Sunday, Return> sunday) {
+    if (this instanceof Day.Monday) {
+      return monday.apply((Day.Monday) this);
+    }
+    if (this instanceof Day.Tuesday) {
+      return tuesday.apply((Day.Tuesday) this);
+    }
+    if (this instanceof Day.Wednesday) {
+      return wednesday.apply((Day.Wednesday) this);
+    }
+    if (this instanceof Day.Thursday) {
+      return thursday.apply((Day.Thursday) this);
+    }
+    if (this instanceof Day.Friday) {
+      return friday.apply((Day.Friday) this);
+    }
+    if (this instanceof Day.Saturday) {
+      return saturday.apply((Day.Saturday) this);
+    }
+    if (this instanceof Day.Sunday) {
+      return sunday.apply((Day.Sunday) this);
+    }
+    throw new IllegalStateException("Unexpected Day subclass encountered.");
+  }
+
   @AutoValue
   public abstract static class Monday extends Day {
   }
@@ -468,6 +521,17 @@ public abstract class GenericAttribute {
 
   public <Return> GenericAttribute.Matching<Return> matching() {
     return new GenericAttribute.Matching<Return>(this);
+  }
+
+  public <Return> Return matching(Function<GenericAttribute.Empty, Return> empty,
+      Function<GenericAttribute.Container, Return> container) {
+    if (this instanceof GenericAttribute.Empty) {
+      return empty.apply((GenericAttribute.Empty) this);
+    }
+    if (this instanceof GenericAttribute.Container) {
+      return container.apply((GenericAttribute.Container) this);
+    }
+    throw new IllegalStateException("Unexpected GenericAttribute subclass encountered.");
   }
 
   @AutoValue

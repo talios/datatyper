@@ -43,11 +43,11 @@ public class DataTypeGenerator {
 
     for (DataType dataType : dataTypeContainer.dataTypes()) {
 
-      final ClassName dataTypeInstanceClassName =
+      ClassName dataTypeInstanceClassName =
           ClassName.get(
               dataTypeContainer.packageName(),
               "AutoValue_" + dataTypeContainer.name() + "_" + dataType.name());
-      final ClassName dataTypeInterfaceName = classNameFor(dataTypeContainer, dataType);
+      ClassName dataTypeInterfaceName = classNameFor(dataTypeContainer, dataType);
 
       // Create data-type constructor/factory method for each data type
       MethodSpec.Builder dataTypeConstuctorBuilder =
@@ -118,6 +118,7 @@ public class DataTypeGenerator {
     if (dataTypeContainer.dataTypes().size() > 1) {
       generateMatcherInterfaceAndCall(gadtTypeBuilder, dataTypeContainer);
       generateFluentMatchingInterfaceAndCall(gadtTypeBuilder, dataTypeContainer);
+      generateLambdaMatchingInterfaceAndCall(gadtTypeBuilder, dataTypeContainer);
     }
 
     TypeSpec gadtType = gadtTypeBuilder.build();
@@ -155,19 +156,19 @@ public class DataTypeGenerator {
               .build());
     }
 
-    final TypeSpec matcherType = matcherTypeBuilder.build();
+    TypeSpec matcherType = matcherTypeBuilder.build();
     gadtTypeBuilder.addType(matcherType);
 
     // add Matcher match method
     ParameterizedTypeName matcherWithReturnType =
         ParameterizedTypeName.get(matcherClassName, returnTypeVariable);
-    final MethodSpec.Builder matcherBuilder =
+    MethodSpec.Builder matcherBuilder =
         MethodSpec.methodBuilder("match")
             .addModifiers(Modifier.FINAL, Modifier.PUBLIC)
             .addTypeVariable(returnTypeVariable)
             .addParameter(matcherWithReturnType, "matcher");
     for (DataType dataType : dataTypeContainer.dataTypes()) {
-      final ClassName className = classNameFor(dataTypeContainer, dataType);
+      ClassName className = classNameFor(dataTypeContainer, dataType);
       matcherBuilder.beginControlFlow("if (this instanceof $T)", className);
       matcherBuilder.addStatement(
           "return matcher.$L(($T) this)", camelCase(dataType.name()), className);
@@ -182,9 +183,45 @@ public class DataTypeGenerator {
     gadtTypeBuilder.addMethod(matcherBuilder.build());
   }
 
+  private static void generateLambdaMatchingInterfaceAndCall(
+      TypeSpec.Builder gadtTypeBuilder, DataTypeContainer dataTypeContainer) {
+    TypeVariableName returnTypeVariable = TypeVariableName.get("Return");
+
+    MethodSpec.Builder lambdaMethod =
+        MethodSpec.methodBuilder("matching")
+            .addModifiers(Modifier.PUBLIC)
+            .addTypeVariable(returnTypeVariable)
+            .returns(returnTypeVariable);
+
+    dataTypeContainer
+        .dataTypes()
+        .forEach(
+            dataType -> {
+              ClassName dataTypeClassName = classNameFor(dataTypeContainer, dataType);
+              ParameterizedTypeName function =
+                  ParameterizedTypeName.get(
+                      ClassName.get(Function.class), dataTypeClassName, returnTypeVariable);
+              String funtionArgName = camelCase(dataType.name());
+
+              lambdaMethod.addParameter(function, funtionArgName);
+
+              lambdaMethod.beginControlFlow("if (this instanceof $T)", dataTypeClassName);
+              lambdaMethod.addStatement(
+                  "return $L.apply(($T) this)", funtionArgName, dataTypeClassName);
+              lambdaMethod.endControlFlow();
+            });
+
+    lambdaMethod.addStatement(
+        "throw new $T(\"Unexpected $L subclass encountered.\")",
+        IllegalStateException.class,
+        dataTypeContainer.name());
+
+    gadtTypeBuilder.addMethod(lambdaMethod.build());
+  }
+
   private static void generateFluentMatchingInterfaceAndCall(
       TypeSpec.Builder gadtTypeBuilder, DataTypeContainer dataTypeContainer) {
-    final TypeVariableName returnTypeVariable = TypeVariableName.get("Return");
+    TypeVariableName returnTypeVariable = TypeVariableName.get("Return");
     TypeSpec.Builder matchingTypeBuilder =
         TypeSpec.classBuilder("Matching")
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
@@ -278,7 +315,7 @@ public class DataTypeGenerator {
             .endControlFlow()
             .build());
 
-    final TypeSpec matchingType = matchingTypeBuilder.build();
+    TypeSpec matchingType = matchingTypeBuilder.build();
     gadtTypeBuilder.addType(matchingType);
   }
 

@@ -1,19 +1,17 @@
 package com.theoryinpractise.gadt;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import java.util.Optional;
+
 import com.theoryinpractise.gadt.examples.Customer;
 import com.theoryinpractise.gadt.examples.Request;
 import org.junit.Test;
 
-import java.util.Optional;
-
-import static com.google.common.truth.Truth.assertThat;
-
 /** Test class is in a different package to generated files to check visibility constraints. */
 public class TestGadt {
-
   @Test
   public void testUsingGadt() {
-
     Request req = Request.GET("/api/story/32");
 
     assertThat(req.toString()).startsWith("GET{path=/api/story/32");
@@ -40,6 +38,16 @@ public class TestGadt {
                 return POST.path().length();
               }
             });
+
+    assertThat(pathLength).isEqualTo(13);
+
+    // Test for total matching via lambdas
+
+    pathLength =
+        req.matching(
+            GET -> GET.path().length(),
+            DELETE -> DELETE.path().length(),
+            POST -> POST.path().length());
 
     assertThat(pathLength).isEqualTo(13);
 
