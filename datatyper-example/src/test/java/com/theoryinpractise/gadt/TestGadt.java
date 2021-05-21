@@ -75,7 +75,7 @@ public class TestGadt {
 
   @Test
   public void testUsingBasicSingleton() {
-    Customer.SimpleCustomer cust = Customer.SimpleCustomer("Test", "Customer");
+    Customer.SimpleCustomer cust = Customer.simpleCustomer("Test", "Customer");
     assertThat(cust.firstName()).isEqualTo("Test");
   }
 }

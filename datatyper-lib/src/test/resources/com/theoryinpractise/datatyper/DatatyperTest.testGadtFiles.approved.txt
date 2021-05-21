@@ -11,20 +11,20 @@ public abstract class Type {
   private Type() {
   }
 
-  public static Type.DataType DataType(final String name) {
+  public static Type.DataType dataType(final String name) {
     return new AutoValue_Type_DataType(name);
   }
 
-  public static Type.SecondDataType SecondDataType(final Integer age) {
+  public static Type.SecondDataType secondDataType(final Integer age) {
     return new AutoValue_Type_SecondDataType(age);
   }
 
   public final <Return> Return match(Type.Matcher<Return> matcher) {
     if (this instanceof Type.DataType) {
-      return matcher.DataType((Type.DataType) this);
+      return matcher.dataType((Type.DataType) this);
     }
     if (this instanceof Type.SecondDataType) {
-      return matcher.SecondDataType((Type.SecondDataType) this);
+      return matcher.secondDataType((Type.SecondDataType) this);
     }
     throw new IllegalStateException("Unexpected Type subclass encountered.");
   }
@@ -44,9 +44,9 @@ public abstract class Type {
   }
 
   public interface Matcher<Return> {
-    Return DataType(Type.DataType DataType);
+    Return dataType(Type.DataType dataType);
 
-    Return SecondDataType(Type.SecondDataType SecondDataType);
+    Return secondDataType(Type.SecondDataType secondDataType);
   }
 
   public static final class Matching<Return> {
@@ -253,55 +253,55 @@ public abstract class Day {
   private Day() {
   }
 
-  public static Day.Monday Monday() {
+  public static Day.Monday monday() {
     return Monday;
   }
 
-  public static Day.Tuesday Tuesday() {
+  public static Day.Tuesday tuesday() {
     return Tuesday;
   }
 
-  public static Day.Wednesday Wednesday() {
+  public static Day.Wednesday wednesday() {
     return Wednesday;
   }
 
-  public static Day.Thursday Thursday() {
+  public static Day.Thursday thursday() {
     return Thursday;
   }
 
-  public static Day.Friday Friday() {
+  public static Day.Friday friday() {
     return Friday;
   }
 
-  public static Day.Saturday Saturday() {
+  public static Day.Saturday saturday() {
     return Saturday;
   }
 
-  public static Day.Sunday Sunday() {
+  public static Day.Sunday sunday() {
     return Sunday;
   }
 
   public final <Return> Return match(Day.Matcher<Return> matcher) {
     if (this instanceof Day.Monday) {
-      return matcher.Monday((Day.Monday) this);
+      return matcher.monday((Day.Monday) this);
     }
     if (this instanceof Day.Tuesday) {
-      return matcher.Tuesday((Day.Tuesday) this);
+      return matcher.tuesday((Day.Tuesday) this);
     }
     if (this instanceof Day.Wednesday) {
-      return matcher.Wednesday((Day.Wednesday) this);
+      return matcher.wednesday((Day.Wednesday) this);
     }
     if (this instanceof Day.Thursday) {
-      return matcher.Thursday((Day.Thursday) this);
+      return matcher.thursday((Day.Thursday) this);
     }
     if (this instanceof Day.Friday) {
-      return matcher.Friday((Day.Friday) this);
+      return matcher.friday((Day.Friday) this);
     }
     if (this instanceof Day.Saturday) {
-      return matcher.Saturday((Day.Saturday) this);
+      return matcher.saturday((Day.Saturday) this);
     }
     if (this instanceof Day.Sunday) {
-      return matcher.Sunday((Day.Sunday) this);
+      return matcher.sunday((Day.Sunday) this);
     }
     throw new IllegalStateException("Unexpected Day subclass encountered.");
   }
@@ -339,19 +339,19 @@ public abstract class Day {
   }
 
   public interface Matcher<Return> {
-    Return Monday(Day.Monday Monday);
+    Return monday(Day.Monday monday);
 
-    Return Tuesday(Day.Tuesday Tuesday);
+    Return tuesday(Day.Tuesday tuesday);
 
-    Return Wednesday(Day.Wednesday Wednesday);
+    Return wednesday(Day.Wednesday wednesday);
 
-    Return Thursday(Day.Thursday Thursday);
+    Return thursday(Day.Thursday thursday);
 
-    Return Friday(Day.Friday Friday);
+    Return friday(Day.Friday friday);
 
-    Return Saturday(Day.Saturday Saturday);
+    Return saturday(Day.Saturday saturday);
 
-    Return Sunday(Day.Sunday Sunday);
+    Return sunday(Day.Sunday sunday);
   }
 
   public static final class Matching<Return> {

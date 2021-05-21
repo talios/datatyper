@@ -50,7 +50,7 @@ public class DataTypeGenerator {
 
       // Create data-type constructor/factory method for each data type
       MethodSpec.Builder dataTypeConstuctorBuilder =
-          MethodSpec.methodBuilder(dataType.name())
+          MethodSpec.methodBuilder(camelCase(dataType.name()))
               .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
               .returns(dataTypeInterfaceName);
 
@@ -65,10 +65,10 @@ public class DataTypeGenerator {
       for (Field field : dataType.fields()) {
         ClassName argClass = resolveClassNameFor(dataTypeContainer, field.type());
 
-        dataTypeConstuctorBuilder.addParameter(argClass, field.name(), Modifier.FINAL);
+        dataTypeConstuctorBuilder.addParameter(argClass, camelCase(field.name()), Modifier.FINAL);
 
         dataTypeBuilder.addMethod(
-            MethodSpec.methodBuilder(field.name())
+            MethodSpec.methodBuilder(camelCase(field.name()))
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .returns(argClass)
                 .build());
@@ -145,9 +145,9 @@ public class DataTypeGenerator {
 
     for (DataType dataType : dataTypeContainer.dataTypes()) {
       matcherTypeBuilder.addMethod(
-          MethodSpec.methodBuilder(dataType.name())
+          MethodSpec.methodBuilder(camelCase(dataType.name()))
               .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-              .addParameter(classNameFor(dataTypeContainer, dataType), dataType.name())
+              .addParameter(classNameFor(dataTypeContainer, dataType), camelCase(dataType.name()))
               .returns(returnTypeVariable)
               .build());
     }
@@ -166,7 +166,8 @@ public class DataTypeGenerator {
     for (DataType dataType : dataTypeContainer.dataTypes()) {
       final ClassName className = classNameFor(dataTypeContainer, dataType);
       matcherBuilder.beginControlFlow("if (this instanceof $T)", className);
-      matcherBuilder.addStatement("return matcher.$L(($T) this)", dataType.name(), className);
+      matcherBuilder.addStatement(
+          "return matcher.$L(($T) this)", camelCase(dataType.name()), className);
       matcherBuilder.endControlFlow();
     }
     matcherBuilder.addStatement(
@@ -282,7 +283,7 @@ public class DataTypeGenerator {
       DataTypeContainer dataTypeContainer, String classReference) {
 
     // if full class, just guess
-    if (classReference.contains(".")) {
+    if (classReference.contains(".") || classReference.contains("<")) {
       return ClassName.bestGuess(classReference);
     }
 
@@ -305,5 +306,16 @@ public class DataTypeGenerator {
   private static ClassName classNameFor(DataTypeContainer dataTypeContainer, DataType dataType) {
     return ClassName.get(
         dataTypeContainer.packageName(), dataTypeContainer.name() + "." + dataType.name());
+  }
+
+  // Convert to camelCase unless ALLCAPS
+  private static String camelCase(String name) {
+    if (name.toUpperCase().equals(name)) {
+      return name;
+    } else {
+      return name.length() == 1
+          ? name.toLowerCase()
+          : name.substring(0, 1).toLowerCase() + name.substring(1);
+    }
   }
 }
