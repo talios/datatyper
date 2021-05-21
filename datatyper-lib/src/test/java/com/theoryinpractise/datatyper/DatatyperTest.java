@@ -5,7 +5,6 @@ import com.theoryinpractise.datatyper.model.Field;
 import com.theoryinpractise.datatyper.model.DataTypeContainer;
 import org.jparsec.Parser;
 import org.jparsec.functors.Pair;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,6 +19,7 @@ import static com.theoryinpractise.datatyper.DatatypeParser.buildImportListParse
 import java.io.StringWriter;
 import java.io.Writer;
 import org.approvaltests.Approvals;
+import org.junit.jupiter.api.Test;
 
 public class DatatyperTest {
 

@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import com.theoryinpractise.gadt.examples.Customer;
 import com.theoryinpractise.gadt.examples.Request;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Test class is in a different package to generated files to check visibility constraints. */
 public class TestGadt {
