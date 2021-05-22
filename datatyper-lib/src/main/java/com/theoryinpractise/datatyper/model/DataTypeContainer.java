@@ -10,6 +10,8 @@ public final class DataTypeContainer {
 
   private String packageName;
 
+  private List<String> genericTypes;
+
   private List<DataType> dataTypes;
 
   private List<String> imports;
@@ -19,11 +21,13 @@ public final class DataTypeContainer {
   public DataTypeContainer(
       String name,
       String packageName,
+      List<String> genericTypes,
       List<DataType> dataTypes,
       List<String> imports,
       Set<String> implememts) {
     this.name = name;
     this.packageName = packageName;
+    this.genericTypes = genericTypes;
     this.dataTypes = dataTypes;
     this.imports = imports;
     this.implememts = implememts;
@@ -35,6 +39,10 @@ public final class DataTypeContainer {
 
   public String packageName() {
     return packageName;
+  }
+
+  public List<String> genericTypes() {
+    return genericTypes;
   }
 
   public List<DataType> dataTypes() {
@@ -56,6 +64,7 @@ public final class DataTypeContainer {
     DataTypeContainer dataTypeContainer = (DataTypeContainer) o;
     return Objects.equals(name, dataTypeContainer.name)
         && Objects.equals(packageName, dataTypeContainer.packageName)
+        && Objects.equals(genericTypes, dataTypeContainer.genericTypes)
         && Objects.equals(dataTypes, dataTypeContainer.dataTypes)
         && Objects.equals(imports, dataTypeContainer.imports)
         && Objects.equals(implememts, dataTypeContainer.implememts);
@@ -63,6 +72,6 @@ public final class DataTypeContainer {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, packageName, dataTypes, imports, implememts);
+    return Objects.hash(name, packageName, genericTypes, dataTypes, imports, implememts);
   }
 }

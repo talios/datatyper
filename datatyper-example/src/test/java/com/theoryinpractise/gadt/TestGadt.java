@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import java.util.Optional;
 
 import com.theoryinpractise.gadt.examples.Customer;
+import com.theoryinpractise.gadt.examples.GenericType;
 import com.theoryinpractise.gadt.examples.Request;
 import org.junit.jupiter.api.Test;
 
@@ -85,5 +86,16 @@ public class TestGadt {
   public void testUsingBasicSingleton() {
     Customer.SimpleCustomer cust = Customer.simpleCustomer("Test", "Customer");
     assertThat(cust.firstName()).isEqualTo("Test");
+  }
+
+  @Test
+  public void testGenericType() {
+    GenericType<String> genType = GenericType.single("Hello");
+
+    int length =
+        genType.matching(
+            empty -> 0, single -> single.value().length(), container -> container.value().size());
+
+    assertThat(length).isEqualTo(5);
   }
 }

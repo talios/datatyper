@@ -492,7 +492,6 @@ package com.test;
 
 import com.google.auto.value.AutoValue;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 public abstract class GenericAttribute {
@@ -570,6 +569,145 @@ public abstract class GenericAttribute {
         final Function<GenericAttribute.Container, Return> fn) {
       if (this.value instanceof GenericAttribute.Container) {
         this.returnValue = fn.apply((GenericAttribute.Container) this.value);
+      }
+      return this;
+    }
+
+    public boolean isMatched() {
+      return this.returnValue != null;
+    }
+
+    public Return get() {
+      if (this.returnValue != null) {
+        return this.returnValue;
+      }
+      else {
+        throw new IllegalStateException("Unmatched value: " + this.value);
+      }
+    }
+
+    public Optional<Return> find() {
+      return Optional.ofNullable(this.returnValue);
+    }
+
+    public Return orElse(final Return returnValue) {
+      if (this.returnValue != null) {
+        return this.returnValue;
+      }
+      else {
+        return returnValue;
+      }
+    }
+  }
+}
+
+
+package com.test;
+
+import com.google.auto.value.AutoValue;
+import java.util.Optional;
+import java.util.function.Function;
+
+public abstract class GenericType<T> {
+  private static final GenericType.Empty Empty = new AutoValue_GenericType_Empty();
+
+  private GenericType() {
+  }
+
+  public static <T> GenericType.Empty<T> empty() {
+    return Empty;
+  }
+
+  public static <T> GenericType.Single<T> single(T value) {
+    return new AutoValue_GenericType_Single(value);
+  }
+
+  public static <T> GenericType.Container<T> container(Set<T> value) {
+    return new AutoValue_GenericType_Container(value);
+  }
+
+  public final <Return> Return match(GenericType.Matcher<T, Return> matcher) {
+    if (this instanceof GenericType.Empty) {
+      return matcher.empty((GenericType.Empty<T>) this);
+    }
+    if (this instanceof GenericType.Single) {
+      return matcher.single((GenericType.Single<T>) this);
+    }
+    if (this instanceof GenericType.Container) {
+      return matcher.container((GenericType.Container<T>) this);
+    }
+    throw new IllegalStateException("Unexpected GenericType subclass encountered.");
+  }
+
+  public <Return> GenericType.Matching<T, Return> matching() {
+    return new GenericType.Matching<T, Return>(this);
+  }
+
+  public <Return> Return matching(Function<GenericType.Empty<T>, Return> empty,
+      Function<GenericType.Single<T>, Return> single,
+      Function<GenericType.Container<T>, Return> container) {
+    if (this instanceof GenericType.Empty) {
+      return empty.apply((GenericType.Empty<T>) this);
+    }
+    if (this instanceof GenericType.Single) {
+      return single.apply((GenericType.Single<T>) this);
+    }
+    if (this instanceof GenericType.Container) {
+      return container.apply((GenericType.Container<T>) this);
+    }
+    throw new IllegalStateException("Unexpected GenericType subclass encountered.");
+  }
+
+  @AutoValue
+  public abstract static class Empty<T> extends GenericType<T> {
+  }
+
+  @AutoValue
+  public abstract static class Single<T> extends GenericType<T> {
+    public abstract T value();
+  }
+
+  @AutoValue
+  public abstract static class Container<T> extends GenericType<T> {
+    public abstract Set<T> value();
+  }
+
+  public interface Matcher<T, Return> {
+    Return empty(GenericType.Empty<T> empty);
+
+    Return single(GenericType.Single<T> single);
+
+    Return container(GenericType.Container<T> container);
+  }
+
+  public static final class Matching<T, Return> {
+    private GenericType value;
+
+    private Return returnValue;
+
+    private Matching(final GenericType value) {
+      this.value = value;
+    }
+
+    public GenericType.Matching<T, Return> Empty(final Function<GenericType.Empty<T>, Return> fn) {
+      if (this.value instanceof GenericType.Empty) {
+        this.returnValue = fn.apply((GenericType.Empty<T>) this.value);
+      }
+      return this;
+    }
+
+    public GenericType.Matching<T, Return> Single(
+        final Function<GenericType.Single<T>, Return> fn) {
+      if (this.value instanceof GenericType.Single) {
+        this.returnValue = fn.apply((GenericType.Single<T>) this.value);
+      }
+      return this;
+    }
+
+    public GenericType.Matching<T, Return> Container(
+        final Function<GenericType.Container<T>, Return> fn) {
+      if (this.value instanceof GenericType.Container) {
+        this.returnValue = fn.apply((GenericType.Container<T>) this.value);
       }
       return this;
     }

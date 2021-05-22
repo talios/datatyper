@@ -4,7 +4,6 @@ import com.theoryinpractise.datatyper.model.DataTypeContainer;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.List;
 
 import static com.theoryinpractise.datatyper.DataTypeGenerator.generateJavaForTypeContainer;
@@ -21,8 +20,8 @@ public final class DataTypeCompiler {
         generateJavaForTypeContainer(dataTypeContainer).writeTo(targetDirectory);
       }
 
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    } catch (Exception e) {
+      throw new RuntimeException(file.getPath() + ": " + e.getMessage(), e);
     }
   }
 }

@@ -11,6 +11,7 @@ import org.jparsec.pattern.Patterns;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import static java.util.Collections.emptyList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -24,22 +25,21 @@ import static org.jparsec.Scanners.string;
 /** Parser for GADT data declarations. */
 public final class DatatypeParser {
 
-  //  private Parser<String> lineComment() {
-  //    return Scanners.JAVA_LINE_COMMENT.source().map(comment -> comment.substring(3));
-  //  }
-
   static Parser<?> comments = or(WHITESPACES, Scanners.HASKELL_LINE_COMMENT).skipMany();
 
   public static Parser<String> label = Patterns.regex("[a-z|A-Z]+").toScanner("regex").source();
+
+  public static Parser<String> genericType =
+      Patterns.regex("[a-z|A-Z][a-z|A-Z]*").toScanner("generic-type-regex").source();
 
   public static Parser<String> className =
       Patterns.regex("[a-z|A-Z][a-z|A-Z|0-9|\\.]+").toScanner("class-regex").source();
 
   public static Parser<String> typeName =
-      Patterns.regex("[a-z|A-Z][<|>|a-z|A-Z|0-9|\\.]+").toScanner("type-regex").source();
+      Patterns.regex("[a-z|A-Z][<|>|a-z|A-Z|0-9|\\.]*").toScanner("type-regex").source();
 
   public static Parser<Void> separator(char separator) {
-    return WHITESPACES.optional().next(isChar(separator)).next(WHITESPACES.optional());
+    return WHITESPACES.optional(null).next(isChar(separator)).next(WHITESPACES.optional(null));
   }
 
   public static Parser<Void> typeSeparator = separator(':');
@@ -64,8 +64,8 @@ public final class DatatypeParser {
   }
 
   public static Parser<DataType> dataType() {
-    final Parser<List<Field>> fields = fields().optional(new ArrayList<>());
-    return Parsers.tuple(label.followedBy(WHITESPACES.optional()), fields)
+    Parser<List<Field>> fields = fields().optional(new ArrayList<>());
+    return Parsers.tuple(label.followedBy(WHITESPACES.optional(null)), fields)
         .map(dataType -> new DataType(dataType.a, dataType.b));
   }
 
@@ -79,22 +79,32 @@ public final class DatatypeParser {
     return parser.between(isChar('('), isChar(')'));
   }
 
+  private static <T> Parser<T> angleParenthesize(Parser<T> parser) {
+    return parser.between(isChar('<'), isChar('>'));
+  }
+
   private static Parser<Void> wsString(String string) {
-    return WHITESPACES.optional().next(string(string)).next(WHITESPACES.optional());
+    return WHITESPACES.optional(null).next(string(string)).next(WHITESPACES.optional(null));
   }
 
   public static Parser<DataTypeContainer> gadt(
       AtomicReference<String> packageName,
       Pair<Parser<List<String>>, AtomicReference<List<String>>> importList) {
 
-    final Parser<List<String>> classNameList =
-        className.followedBy(fieldSeparator.optional()).many();
+    Parser<List<String>> classNameList = className.followedBy(fieldSeparator.optional(null)).many();
 
-    final Parser<List<String>> implementsClause =
+    Parser<List<String>> genericTypeList =
+        genericType.followedBy(fieldSeparator.optional(null)).many();
+
+    Parser<List<String>> genericTypesClause = angleParenthesize(genericTypeList);
+
+    Parser<List<String>> optionalGenericTypes = genericTypesClause.optional(emptyList());
+
+    Parser<List<String>> implementsClause =
         wsString("implements").next(parenthesize(classNameList)).followedBy(wsString("="));
 
-    final Parser<List<String>> optionalImplementsClause =
-        or(wsString("=").map(aVoid -> new ArrayList<>()), implementsClause);
+    Parser<List<String>> optionalImplementsClause =
+        or(wsString("=").map(aVoid -> emptyList()), implementsClause);
 
     return comments
         .next(importList.a)
@@ -103,16 +113,18 @@ public final class DatatypeParser {
             string("data")
                 .next(WHITESPACES)
                 .next(
-                    Parsers.tuple(label, optionalImplementsClause, dataTypes())
+                    Parsers.tuple(
+                            label, optionalGenericTypes, optionalImplementsClause, dataTypes())
                         .followedBy(comments)
                         .map(
                             gadt ->
                                 new DataTypeContainer(
                                     gadt.a,
                                     packageName.get(),
-                                    gadt.c,
+                                    gadt.b,
+                                    gadt.d,
                                     copyOfList(importList.b.get()),
-                                    new HashSet<>(gadt.b)))))
+                                    new HashSet<>(gadt.c)))))
         .followedBy(isChar(';').next(comments));
   }
 
@@ -152,7 +164,7 @@ public final class DatatypeParser {
   public static Pair<Parser<List<String>>, AtomicReference<List<String>>> buildImportListParser() {
     AtomicReference<List<String>> importListRef = new AtomicReference<>();
 
-    final Parser<List<String>> parser =
+    Parser<List<String>> parser =
         importDecl()
             .many()
             .map(

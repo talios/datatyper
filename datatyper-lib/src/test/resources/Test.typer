@@ -1,6 +1,8 @@
 -- Standard Data Types to use in the program
 package com.test;
 
+import java.util.Set;
+
 data Type = DataType(name: String)
           | SecondDataType(age: Integer);
 
@@ -15,4 +17,9 @@ data Day
 
 data GenericAttribute
   = Empty
-  | Container(value: java.util.Set<String>);
+  | Container(value: Set<String>);
+
+data GenericType<T>
+  = Empty
+  | Single(value: T)
+  | Container(value: Set<T>);

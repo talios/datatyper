@@ -25,3 +25,8 @@ data Log
   | debug(date: Date, message: String)
   | warn(date: Date, message: String)
   | error(date: Date, message: String);
+
+data GenericType<T>
+  = Empty
+  | Single(value: T)
+  | Container(value: java.util.Set<T>);

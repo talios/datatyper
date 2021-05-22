@@ -92,6 +92,8 @@ public class DatatyperTest {
         DatatypeParser.typerFile()
             .parse(new InputStreamReader(DatatyperTest.class.getResourceAsStream("/Test.typer")));
 
+    assertThat(dataTypeContainers).hasSize(5);
+
     Writer writer = new StringWriter();
 
     for (DataTypeContainer dataTypeContainer : dataTypeContainers) {

@@ -15,9 +15,12 @@ import com.theoryinpractise.datatyper.model.DataTypeContainer;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+import static java.util.stream.Collectors.toList;
 
 /** Created by amrk on 2/08/15. */
 public class DataTypeGenerator {
@@ -34,6 +37,23 @@ public class DataTypeGenerator {
         TypeSpec.classBuilder(dataTypeContainer.name())
             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
 
+    for (String genericType : dataTypeContainer.genericTypes()) {
+      gadtTypeBuilder.addTypeVariable(TypeVariableName.get(genericType));
+    }
+
+    List<TypeVariableName> genericTypeVariableNames =
+        dataTypeContainer.genericTypes().stream().map(TypeVariableName::get).collect(toList());
+
+    TypeName gadtTypeName;
+    if (genericTypeVariableNames.isEmpty()) {
+      gadtTypeName = gadtClassName;
+    } else {
+      gadtTypeName =
+          ParameterizedTypeName.get(
+              ClassName.bestGuess(dataTypeContainer.name()),
+              genericTypeVariableNames.toArray(new TypeVariableName[] {}));
+    }
+
     for (String implementsClass : dataTypeContainer.implememts()) {
       gadtTypeBuilder.addSuperinterface(resolveClassNameFor(dataTypeContainer, implementsClass));
     }
@@ -47,7 +67,8 @@ public class DataTypeGenerator {
           ClassName.get(
               dataTypeContainer.packageName(),
               "AutoValue_" + dataTypeContainer.name() + "_" + dataType.name());
-      ClassName dataTypeInterfaceName = classNameFor(dataTypeContainer, dataType);
+      TypeName rawDataTypeInterfaceName = classNameFor(dataTypeContainer, dataType);
+      TypeName dataTypeInterfaceName = typeNameFor(dataTypeContainer, dataType);
 
       // Create data-type constructor/factory method for each data type
       MethodSpec.Builder dataTypeConstuctorBuilder =
@@ -60,7 +81,18 @@ public class DataTypeGenerator {
           TypeSpec.classBuilder(dataType.name())
               .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT, Modifier.STATIC)
               .addAnnotation(autoValue)
-              .superclass(gadtClassName);
+              .superclass(gadtTypeName);
+
+      // For each field, if it's a generic type, add that to the declaration(s)
+      Set<String> usedGenericTypes = new HashSet<>();
+      for (String genericType : dataTypeContainer.genericTypes()) {
+        if (!usedGenericTypes.contains(genericType)) {
+          TypeVariableName fieldVariable = TypeVariableName.get(genericType);
+          dataTypeConstuctorBuilder.addTypeVariable(fieldVariable);
+          dataTypeBuilder.addTypeVariable(fieldVariable);
+          usedGenericTypes.add(genericType);
+        }
+      }
 
       // For each field, add an argument to the constructor method, and a field to the class.
       for (Field field : dataType.fields()) {
@@ -83,7 +115,7 @@ public class DataTypeGenerator {
         // declare singleton
         gadtTypeBuilder.addField(
             FieldSpec.builder(
-                    dataTypeInterfaceName,
+                    rawDataTypeInterfaceName,
                     dataType.name(),
                     Modifier.PRIVATE,
                     Modifier.STATIC,
@@ -141,9 +173,16 @@ public class DataTypeGenerator {
     // Generate matcher interface
     TypeVariableName returnTypeVariable = TypeVariableName.get("Return");
     TypeSpec.Builder matcherTypeBuilder =
-        TypeSpec.interfaceBuilder("Matcher")
-            .addModifiers(Modifier.PUBLIC)
-            .addTypeVariable(returnTypeVariable);
+        TypeSpec.interfaceBuilder("Matcher").addModifiers(Modifier.PUBLIC);
+
+    List<TypeVariableName> genericTypeVariableNames =
+        dataTypeContainer.genericTypes().stream().map(TypeVariableName::get).collect(toList());
+
+    for (TypeVariableName genericType : genericTypeVariableNames) {
+      matcherTypeBuilder.addTypeVariable(genericType);
+    }
+    matcherTypeBuilder.addTypeVariable(returnTypeVariable);
+
     ClassName matcherClassName =
         ClassName.get(dataTypeContainer.packageName(), dataTypeContainer.name() + ".Matcher");
 
@@ -151,7 +190,7 @@ public class DataTypeGenerator {
       matcherTypeBuilder.addMethod(
           MethodSpec.methodBuilder(camelCase(dataType.name()))
               .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-              .addParameter(classNameFor(dataTypeContainer, dataType), camelCase(dataType.name()))
+              .addParameter(typeNameFor(dataTypeContainer, dataType), camelCase(dataType.name()))
               .returns(returnTypeVariable)
               .build());
     }
@@ -160,18 +199,24 @@ public class DataTypeGenerator {
     gadtTypeBuilder.addType(matcherType);
 
     // add Matcher match method
+    List<TypeVariableName> matcherTypes = new ArrayList<>(genericTypeVariableNames);
+    matcherTypes.add(returnTypeVariable);
+
     ParameterizedTypeName matcherWithReturnType =
-        ParameterizedTypeName.get(matcherClassName, returnTypeVariable);
+        ParameterizedTypeName.get(
+            matcherClassName, matcherTypes.toArray(new TypeVariableName[] {}));
+
     MethodSpec.Builder matcherBuilder =
         MethodSpec.methodBuilder("match")
             .addModifiers(Modifier.FINAL, Modifier.PUBLIC)
             .addTypeVariable(returnTypeVariable)
             .addParameter(matcherWithReturnType, "matcher");
     for (DataType dataType : dataTypeContainer.dataTypes()) {
+      TypeName typeName = typeNameFor(dataTypeContainer, dataType);
       ClassName className = classNameFor(dataTypeContainer, dataType);
       matcherBuilder.beginControlFlow("if (this instanceof $T)", className);
       matcherBuilder.addStatement(
-          "return matcher.$L(($T) this)", camelCase(dataType.name()), className);
+          "return matcher.$L(($T) this)", camelCase(dataType.name()), typeName);
       matcherBuilder.endControlFlow();
     }
     matcherBuilder.addStatement(
@@ -197,17 +242,18 @@ public class DataTypeGenerator {
         .dataTypes()
         .forEach(
             dataType -> {
-              ClassName dataTypeClassName = classNameFor(dataTypeContainer, dataType);
+              TypeName dataTypeClassName = classNameFor(dataTypeContainer, dataType);
+              TypeName dataTypeTypeName = typeNameFor(dataTypeContainer, dataType);
               ParameterizedTypeName function =
                   ParameterizedTypeName.get(
-                      ClassName.get(Function.class), dataTypeClassName, returnTypeVariable);
+                      ClassName.get(Function.class), dataTypeTypeName, returnTypeVariable);
               String funtionArgName = camelCase(dataType.name());
 
               lambdaMethod.addParameter(function, funtionArgName);
 
               lambdaMethod.beginControlFlow("if (this instanceof $T)", dataTypeClassName);
               lambdaMethod.addStatement(
-                  "return $L.apply(($T) this)", funtionArgName, dataTypeClassName);
+                  "return $L.apply(($T) this)", funtionArgName, dataTypeTypeName);
               lambdaMethod.endControlFlow();
             });
 
@@ -224,8 +270,15 @@ public class DataTypeGenerator {
     TypeVariableName returnTypeVariable = TypeVariableName.get("Return");
     TypeSpec.Builder matchingTypeBuilder =
         TypeSpec.classBuilder("Matching")
-            .addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
-            .addTypeVariable(returnTypeVariable);
+            .addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC);
+
+    List<TypeVariableName> genericTypeVariableNames =
+        dataTypeContainer.genericTypes().stream().map(TypeVariableName::get).collect(toList());
+
+    for (TypeVariableName genericType : genericTypeVariableNames) {
+      matchingTypeBuilder.addTypeVariable(genericType);
+    }
+    matchingTypeBuilder.addTypeVariable(returnTypeVariable);
 
     ClassName gadtClassName =
         ClassName.get(dataTypeContainer.packageName(), dataTypeContainer.name());
@@ -241,8 +294,13 @@ public class DataTypeGenerator {
     ClassName matchingClassName =
         ClassName.get(dataTypeContainer.packageName(), dataTypeContainer.name() + ".Matching");
 
+    // TODO pulling out generic type variable names is becoming common, extract.
+    List<TypeVariableName> matcherTypes = new ArrayList<>(genericTypeVariableNames);
+    matcherTypes.add(returnTypeVariable);
+
     ParameterizedTypeName matchingWithReturnType =
-        ParameterizedTypeName.get(matchingClassName, returnTypeVariable);
+        ParameterizedTypeName.get(
+            matchingClassName, matcherTypes.toArray(new TypeVariableName[] {}));
 
     gadtTypeBuilder.addMethod(
         MethodSpec.methodBuilder("matching")
@@ -253,10 +311,11 @@ public class DataTypeGenerator {
             .build());
 
     for (DataType dataType : dataTypeContainer.dataTypes()) {
-      ClassName dataTypeClassName = classNameFor(dataTypeContainer, dataType);
+      TypeName dataTypeClassName = classNameFor(dataTypeContainer, dataType);
+      TypeName dataTypeTypeName = typeNameFor(dataTypeContainer, dataType);
       ParameterizedTypeName function =
           ParameterizedTypeName.get(
-              ClassName.get(Function.class), dataTypeClassName, returnTypeVariable);
+              ClassName.get(Function.class), dataTypeTypeName, returnTypeVariable);
 
       matchingTypeBuilder.addMethod(
           MethodSpec.methodBuilder(dataType.name())
@@ -264,7 +323,7 @@ public class DataTypeGenerator {
               .addParameter(function, "fn", Modifier.FINAL)
               .returns(matchingWithReturnType)
               .beginControlFlow("if (this.value instanceof $T)", dataTypeClassName)
-              .addStatement("this.returnValue = fn.apply(($T) this.value)", dataTypeClassName)
+              .addStatement("this.returnValue = fn.apply(($T) this.value)", dataTypeTypeName)
               .endControlFlow()
               .addStatement("return this")
               .build());
@@ -322,6 +381,11 @@ public class DataTypeGenerator {
   private static TypeName resolveClassNameFor(
       DataTypeContainer dataTypeContainer, String classReference) {
 
+    // generic type
+    if (dataTypeContainer.genericTypes().contains(classReference)) {
+      return TypeVariableName.get(classReference);
+    }
+
     // test for generics - do a half arsed attempt as wacky resolution with javapoet
     if (classReference.contains("<")) {
       String[] types = classReference.replaceAll("[<|>|,]", " ").split(" ");
@@ -357,6 +421,25 @@ public class DataTypeGenerator {
   private static ClassName classNameFor(DataTypeContainer dataTypeContainer, DataType dataType) {
     return ClassName.get(
         dataTypeContainer.packageName(), dataTypeContainer.name() + "." + dataType.name());
+  }
+
+  private static TypeName typeNameFor(DataTypeContainer dataTypeContainer, DataType dataType) {
+
+    ClassName className =
+        ClassName.get(
+            dataTypeContainer.packageName(), dataTypeContainer.name() + "." + dataType.name());
+
+    if (dataTypeContainer.genericTypes().isEmpty()) {
+      return className;
+
+    } else {
+
+      TypeVariableName[] typeNames = new TypeVariableName[dataTypeContainer.genericTypes().size()];
+      for (int i = 0; i < dataTypeContainer.genericTypes().size(); i++) {
+        typeNames[i] = TypeVariableName.get(dataTypeContainer.genericTypes().get(i));
+      }
+      return ParameterizedTypeName.get(className, typeNames);
+    }
   }
 
   // Convert to camelCase unless ALLCAPS
