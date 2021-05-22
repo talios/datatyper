@@ -1,13 +1,11 @@
 package com.theoryinpractise.gadt;
 
-import static com.google.common.truth.Truth.assertThat;
-
-import java.util.Optional;
-
 import com.theoryinpractise.gadt.examples.Customer;
 import com.theoryinpractise.gadt.examples.GenericType;
 import com.theoryinpractise.gadt.examples.Request;
 import org.junit.jupiter.api.Test;
+import java.util.Optional;
+import static com.google.common.truth.Truth.assertThat;
 
 /** Test class is in a different package to generated files to check visibility constraints. */
 public class TestGadt {
@@ -91,6 +89,8 @@ public class TestGadt {
   @Test
   public void testGenericType() {
     GenericType<String> genType = GenericType.single("Hello");
+
+    genType.shout();
 
     int length =
         genType.matching(

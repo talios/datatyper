@@ -378,6 +378,15 @@ public class DataTypeGenerator {
     gadtTypeBuilder.addType(matchingType);
   }
 
+  public static String expandImport(List<String> imports, String value) {
+    String expanded = value;
+    for (String importVal : imports) {
+      String localType = importVal.substring(importVal.lastIndexOf(".") + 1);
+      expanded = expanded.replaceAll(localType, importVal);
+    }
+    return expanded;
+  }
+
   private static TypeName resolveClassNameFor(
       DataTypeContainer dataTypeContainer, String classReference) {
 
@@ -388,7 +397,8 @@ public class DataTypeGenerator {
 
     // test for generics - do a half arsed attempt as wacky resolution with javapoet
     if (classReference.contains("<")) {
-      String[] types = classReference.replaceAll("[<|>|,]", " ").split(" ");
+      String expandedClassReference = expandImport(dataTypeContainer.imports(), classReference);
+      String[] types = expandedClassReference.replaceAll("[<|>|,]", " ").split(" ");
       ClassName baseClassName = ClassName.bestGuess(types[0]);
       ClassName[] typeArgs = new ClassName[types.length - 1];
       for (int i = 1; i < types.length; i++) {

@@ -51,7 +51,12 @@ public final class DatatypeParser {
   }
 
   public static Parser<String> importDecl() {
-    return string("import").next(WHITESPACES).next(className).followedBy(isChar(';'));
+    return WHITESPACES
+        .optional(null)
+        .next(string("import"))
+        .next(WHITESPACES)
+        .next(className)
+        .followedBy(isChar(';'));
   }
 
   public static Parser<Field> field() {

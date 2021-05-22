@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.theoryinpractise.datatyper.DataTypeGenerator.expandImport;
 import static com.theoryinpractise.datatyper.DataTypeGenerator.generateJavaForTypeContainer;
 import static com.theoryinpractise.datatyper.DatatypeParser.buildImportListParser;
 import java.io.StringWriter;
@@ -79,11 +80,22 @@ public class DatatyperTest {
         .hasSize(2);
 
     String source =
-        "import some.Object;\n\n"
+        "import some.Object;\n"
+            + "import some.OtherObject;\n\n"
             + "data Type = DataType(name: java.lang.String)\n"
             + "  | SecondDataType(age: Integer);\n\n\n";
 
-    System.out.println(DatatypeParser.gadt(testPackage, testImports).parse(source));
+    DataTypeContainer gadt = DatatypeParser.gadt(testPackage, testImports).parse(source);
+
+    assertThat(gadt.imports()).containsExactly("some.Object", "some.OtherObject");
+
+    System.out.println(gadt);
+  }
+
+  @Test
+  public void testImportExpansion() {
+    List<String> imports = Arrays.asList("some.Object", "some.OtherObject", "java.util.Set");
+    assertThat(expandImport(imports, "Set<T>")).isEqualTo("java.util.Set<T>");
   }
 
   @Test

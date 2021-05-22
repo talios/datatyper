@@ -5,6 +5,7 @@ package com.theoryinpractise.gadt.examples;
 -- simply import them
 
 import java.util.Date;
+import java.util.Set;
 import com.theoryinpractise.gadt.Shouter;
 
 data Customer = SimpleCustomer(firstName: String, lastName: String);
@@ -26,7 +27,7 @@ data Log
   | warn(date: Date, message: String)
   | error(date: Date, message: String);
 
-data GenericType<T>
+data GenericType<T> implements (Shouter)
   = Empty
   | Single(value: T)
-  | Container(value: java.util.Set<T>);
+  | Container(value: Set<T>);
