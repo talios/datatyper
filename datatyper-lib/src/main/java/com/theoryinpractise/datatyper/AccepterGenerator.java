@@ -56,6 +56,7 @@ public class AccepterGenerator {
       ClassName className = classNameFor(dataTypeContainer, dataType);
       accepterBuilder.beginControlFlow("if (this instanceof $T)", className);
       accepterBuilder.addStatement("accepter.$L(($T) this)", camelCase(dataType.name()), typeName);
+      accepterBuilder.addStatement("return");
       accepterBuilder.endControlFlow();
     }
     accepterBuilder.addStatement(

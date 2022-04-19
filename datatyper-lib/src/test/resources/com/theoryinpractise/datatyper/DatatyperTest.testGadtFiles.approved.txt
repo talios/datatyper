@@ -34,9 +34,11 @@ public abstract class Type {
   public final void accept(Type.Accepter accepter) {
     if (this instanceof Type.DataType) {
       accepter.dataType((Type.DataType) this);
+      return;
     }
     if (this instanceof Type.SecondDataType) {
       accepter.secondDataType((Type.SecondDataType) this);
+      return;
     }
     throw new IllegalStateException("Unexpected Type subclass encountered.");
   }
@@ -218,12 +220,15 @@ public abstract class Request {
   public final void accept(Request.Accepter accepter) {
     if (this instanceof Request.GET) {
       accepter.GET((Request.GET) this);
+      return;
     }
     if (this instanceof Request.PUT) {
       accepter.PUT((Request.PUT) this);
+      return;
     }
     if (this instanceof Request.DELETE) {
       accepter.DELETE((Request.DELETE) this);
+      return;
     }
     throw new IllegalStateException("Unexpected Request subclass encountered.");
   }
@@ -478,24 +483,31 @@ public abstract class Day {
   public final void accept(Day.Accepter accepter) {
     if (this instanceof Day.Monday) {
       accepter.monday((Day.Monday) this);
+      return;
     }
     if (this instanceof Day.Tuesday) {
       accepter.tuesday((Day.Tuesday) this);
+      return;
     }
     if (this instanceof Day.Wednesday) {
       accepter.wednesday((Day.Wednesday) this);
+      return;
     }
     if (this instanceof Day.Thursday) {
       accepter.thursday((Day.Thursday) this);
+      return;
     }
     if (this instanceof Day.Friday) {
       accepter.friday((Day.Friday) this);
+      return;
     }
     if (this instanceof Day.Saturday) {
       accepter.saturday((Day.Saturday) this);
+      return;
     }
     if (this instanceof Day.Sunday) {
       accepter.sunday((Day.Sunday) this);
+      return;
     }
     throw new IllegalStateException("Unexpected Day subclass encountered.");
   }
@@ -803,9 +815,11 @@ public abstract class GenericAttribute {
   public final void accept(GenericAttribute.Accepter accepter) {
     if (this instanceof GenericAttribute.Empty) {
       accepter.empty((GenericAttribute.Empty) this);
+      return;
     }
     if (this instanceof GenericAttribute.Container) {
       accepter.container((GenericAttribute.Container) this);
+      return;
     }
     throw new IllegalStateException("Unexpected GenericAttribute subclass encountered.");
   }
@@ -991,12 +1005,15 @@ public abstract class GenericType<T> {
   public final void accept(GenericType.Accepter accepter) {
     if (this instanceof GenericType.Empty) {
       accepter.empty((GenericType.Empty<T>) this);
+      return;
     }
     if (this instanceof GenericType.Single) {
       accepter.single((GenericType.Single<T>) this);
+      return;
     }
     if (this instanceof GenericType.Container) {
       accepter.container((GenericType.Container<T>) this);
+      return;
     }
     throw new IllegalStateException("Unexpected GenericType subclass encountered.");
   }
