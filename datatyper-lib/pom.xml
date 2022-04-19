@@ -5,12 +5,12 @@
   <parent>
     <groupId>com.theoryinpractise.datatyper</groupId>
     <artifactId>datatyper</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2-SNAPSHOT</version>
   </parent>
 
   <groupId>com.theoryinpractise.datatyper</groupId>
   <artifactId>datatyper-lib</artifactId>
-  <version>1.1.1</version>
+  <version>1.1.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>datatyper-lib</name>
