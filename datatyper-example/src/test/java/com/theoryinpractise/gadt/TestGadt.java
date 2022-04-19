@@ -5,6 +5,8 @@ import com.theoryinpractise.gadt.examples.GenericType;
 import com.theoryinpractise.gadt.examples.Request;
 import org.junit.jupiter.api.Test;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static com.google.common.truth.Truth.assertThat;
 
 /** Test class is in a different package to generated files to check visibility constraints. */
@@ -97,5 +99,16 @@ public class TestGadt {
             empty -> 0, single -> single.value().length(), container -> container.value().size());
 
     assertThat(length).isEqualTo(5);
+  }
+
+  @Test
+  public void testAcceptingBasicSingleton() {
+    Request req = Request.GET("/api/story/32");
+
+    AtomicBoolean done = new AtomicBoolean(false);
+
+    req.accepting().POST(r -> done.set(false)).orElse(r -> done.set(true));
+
+    assertThat(done.get()).isTrue();
   }
 }

@@ -11,7 +11,7 @@
       <plugin>
         <groupId>com.theoryinpractise.datatyper</groupId>
         <artifactId>datatyper-maven-plugin</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.1.2</version>
         <executions>
           <execution>
             <id>datatyper</id>
@@ -23,15 +23,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <dependencies>
-    <!-- Generated DataTyper files use this -->
-    <dependency>
-      <groupId>com.google.auto.value</groupId>
-      <artifactId>auto-value</artifactId>
-      <version>1.4.1</version>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
-
 </project>

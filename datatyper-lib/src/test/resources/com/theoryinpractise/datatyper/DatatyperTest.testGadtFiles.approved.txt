@@ -2,6 +2,7 @@ package com.test;
 
 import com.google.auto.value.AutoValue;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class Type {
@@ -28,6 +29,20 @@ public abstract class Type {
 
   public <Return> Type.Matching<Return> matching() {
     return new Type.Matching<Return>(this);
+  }
+
+  public final void accept(Type.Accepter accepter) {
+    if (this instanceof Type.DataType) {
+      accepter.dataType((Type.DataType) this);
+    }
+    if (this instanceof Type.SecondDataType) {
+      accepter.secondDataType((Type.SecondDataType) this);
+    }
+    throw new IllegalStateException("Unexpected Type subclass encountered.");
+  }
+
+  public Type.Accepting accepting() {
+    return new Type.Accepting(this);
   }
 
   public <Return> Return matching(Function<Type.DataType, Return> dataType,
@@ -106,6 +121,57 @@ public abstract class Type {
       }
     }
   }
+
+  public interface Accepter {
+    void dataType(Type.DataType dataType);
+
+    void secondDataType(Type.SecondDataType secondDataType);
+  }
+
+  public static final class Accepting {
+    private boolean done;
+
+    private Type value;
+
+    private Accepting(final Type value) {
+      this.value = value;
+    }
+
+    public Type.Accepting DataType(final Consumer<Type.DataType> fn) {
+      if (this.value instanceof Type.DataType) {
+        fn.accept((Type.DataType) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public Type.Accepting SecondDataType(final Consumer<Type.SecondDataType> fn) {
+      if (this.value instanceof Type.SecondDataType) {
+        fn.accept((Type.SecondDataType) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public boolean wasAccepted() {
+      return this.done;
+    }
+
+    public void accept() {
+      if (!this.done) {
+        throw new IllegalStateException("Unmatched value: " + this.value);
+      }
+    }
+
+    public void orElse(final Consumer<Type> fn) {
+      if (!this.done) {
+        fn.accept(this.value);
+      }
+      else {
+        throw new IllegalStateException("Value already matched: " + this.value);
+      }
+    }
+  }
 }
 
 
@@ -113,6 +179,7 @@ package com.test;
 
 import com.google.auto.value.AutoValue;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class Request {
@@ -146,6 +213,23 @@ public abstract class Request {
 
   public <Return> Request.Matching<Return> matching() {
     return new Request.Matching<Return>(this);
+  }
+
+  public final void accept(Request.Accepter accepter) {
+    if (this instanceof Request.GET) {
+      accepter.GET((Request.GET) this);
+    }
+    if (this instanceof Request.PUT) {
+      accepter.PUT((Request.PUT) this);
+    }
+    if (this instanceof Request.DELETE) {
+      accepter.DELETE((Request.DELETE) this);
+    }
+    throw new IllegalStateException("Unexpected Request subclass encountered.");
+  }
+
+  public Request.Accepting accepting() {
+    return new Request.Accepting(this);
   }
 
   public <Return> Return matching(Function<Request.GET, Return> GET,
@@ -245,6 +329,67 @@ public abstract class Request {
       }
     }
   }
+
+  public interface Accepter {
+    void GET(Request.GET GET);
+
+    void PUT(Request.PUT PUT);
+
+    void DELETE(Request.DELETE DELETE);
+  }
+
+  public static final class Accepting {
+    private boolean done;
+
+    private Request value;
+
+    private Accepting(final Request value) {
+      this.value = value;
+    }
+
+    public Request.Accepting GET(final Consumer<Request.GET> fn) {
+      if (this.value instanceof Request.GET) {
+        fn.accept((Request.GET) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public Request.Accepting PUT(final Consumer<Request.PUT> fn) {
+      if (this.value instanceof Request.PUT) {
+        fn.accept((Request.PUT) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public Request.Accepting DELETE(final Consumer<Request.DELETE> fn) {
+      if (this.value instanceof Request.DELETE) {
+        fn.accept((Request.DELETE) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public boolean wasAccepted() {
+      return this.done;
+    }
+
+    public void accept() {
+      if (!this.done) {
+        throw new IllegalStateException("Unmatched value: " + this.value);
+      }
+    }
+
+    public void orElse(final Consumer<Request> fn) {
+      if (!this.done) {
+        fn.accept(this.value);
+      }
+      else {
+        throw new IllegalStateException("Value already matched: " + this.value);
+      }
+    }
+  }
 }
 
 
@@ -252,6 +397,7 @@ package com.test;
 
 import com.google.auto.value.AutoValue;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class Day {
@@ -327,6 +473,35 @@ public abstract class Day {
 
   public <Return> Day.Matching<Return> matching() {
     return new Day.Matching<Return>(this);
+  }
+
+  public final void accept(Day.Accepter accepter) {
+    if (this instanceof Day.Monday) {
+      accepter.monday((Day.Monday) this);
+    }
+    if (this instanceof Day.Tuesday) {
+      accepter.tuesday((Day.Tuesday) this);
+    }
+    if (this instanceof Day.Wednesday) {
+      accepter.wednesday((Day.Wednesday) this);
+    }
+    if (this instanceof Day.Thursday) {
+      accepter.thursday((Day.Thursday) this);
+    }
+    if (this instanceof Day.Friday) {
+      accepter.friday((Day.Friday) this);
+    }
+    if (this instanceof Day.Saturday) {
+      accepter.saturday((Day.Saturday) this);
+    }
+    if (this instanceof Day.Sunday) {
+      accepter.sunday((Day.Sunday) this);
+    }
+    throw new IllegalStateException("Unexpected Day subclass encountered.");
+  }
+
+  public Day.Accepting accepting() {
+    return new Day.Accepting(this);
   }
 
   public <Return> Return matching(Function<Day.Monday, Return> monday,
@@ -485,6 +660,107 @@ public abstract class Day {
       }
     }
   }
+
+  public interface Accepter {
+    void monday(Day.Monday monday);
+
+    void tuesday(Day.Tuesday tuesday);
+
+    void wednesday(Day.Wednesday wednesday);
+
+    void thursday(Day.Thursday thursday);
+
+    void friday(Day.Friday friday);
+
+    void saturday(Day.Saturday saturday);
+
+    void sunday(Day.Sunday sunday);
+  }
+
+  public static final class Accepting {
+    private boolean done;
+
+    private Day value;
+
+    private Accepting(final Day value) {
+      this.value = value;
+    }
+
+    public Day.Accepting Monday(final Consumer<Day.Monday> fn) {
+      if (this.value instanceof Day.Monday) {
+        fn.accept((Day.Monday) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public Day.Accepting Tuesday(final Consumer<Day.Tuesday> fn) {
+      if (this.value instanceof Day.Tuesday) {
+        fn.accept((Day.Tuesday) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public Day.Accepting Wednesday(final Consumer<Day.Wednesday> fn) {
+      if (this.value instanceof Day.Wednesday) {
+        fn.accept((Day.Wednesday) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public Day.Accepting Thursday(final Consumer<Day.Thursday> fn) {
+      if (this.value instanceof Day.Thursday) {
+        fn.accept((Day.Thursday) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public Day.Accepting Friday(final Consumer<Day.Friday> fn) {
+      if (this.value instanceof Day.Friday) {
+        fn.accept((Day.Friday) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public Day.Accepting Saturday(final Consumer<Day.Saturday> fn) {
+      if (this.value instanceof Day.Saturday) {
+        fn.accept((Day.Saturday) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public Day.Accepting Sunday(final Consumer<Day.Sunday> fn) {
+      if (this.value instanceof Day.Sunday) {
+        fn.accept((Day.Sunday) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public boolean wasAccepted() {
+      return this.done;
+    }
+
+    public void accept() {
+      if (!this.done) {
+        throw new IllegalStateException("Unmatched value: " + this.value);
+      }
+    }
+
+    public void orElse(final Consumer<Day> fn) {
+      if (!this.done) {
+        fn.accept(this.value);
+      }
+      else {
+        throw new IllegalStateException("Value already matched: " + this.value);
+      }
+    }
+  }
 }
 
 
@@ -493,6 +769,7 @@ package com.test;
 import com.google.auto.value.AutoValue;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class GenericAttribute {
@@ -521,6 +798,20 @@ public abstract class GenericAttribute {
 
   public <Return> GenericAttribute.Matching<Return> matching() {
     return new GenericAttribute.Matching<Return>(this);
+  }
+
+  public final void accept(GenericAttribute.Accepter accepter) {
+    if (this instanceof GenericAttribute.Empty) {
+      accepter.empty((GenericAttribute.Empty) this);
+    }
+    if (this instanceof GenericAttribute.Container) {
+      accepter.container((GenericAttribute.Container) this);
+    }
+    throw new IllegalStateException("Unexpected GenericAttribute subclass encountered.");
+  }
+
+  public GenericAttribute.Accepting accepting() {
+    return new GenericAttribute.Accepting(this);
   }
 
   public <Return> Return matching(Function<GenericAttribute.Empty, Return> empty,
@@ -600,6 +891,57 @@ public abstract class GenericAttribute {
       }
     }
   }
+
+  public interface Accepter {
+    void empty(GenericAttribute.Empty empty);
+
+    void container(GenericAttribute.Container container);
+  }
+
+  public static final class Accepting {
+    private boolean done;
+
+    private GenericAttribute value;
+
+    private Accepting(final GenericAttribute value) {
+      this.value = value;
+    }
+
+    public GenericAttribute.Accepting Empty(final Consumer<GenericAttribute.Empty> fn) {
+      if (this.value instanceof GenericAttribute.Empty) {
+        fn.accept((GenericAttribute.Empty) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public GenericAttribute.Accepting Container(final Consumer<GenericAttribute.Container> fn) {
+      if (this.value instanceof GenericAttribute.Container) {
+        fn.accept((GenericAttribute.Container) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public boolean wasAccepted() {
+      return this.done;
+    }
+
+    public void accept() {
+      if (!this.done) {
+        throw new IllegalStateException("Unmatched value: " + this.value);
+      }
+    }
+
+    public void orElse(final Consumer<GenericAttribute> fn) {
+      if (!this.done) {
+        fn.accept(this.value);
+      }
+      else {
+        throw new IllegalStateException("Value already matched: " + this.value);
+      }
+    }
+  }
 }
 
 
@@ -608,6 +950,7 @@ package com.test;
 import com.google.auto.value.AutoValue;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class GenericType<T> {
@@ -643,6 +986,23 @@ public abstract class GenericType<T> {
 
   public <Return> GenericType.Matching<T, Return> matching() {
     return new GenericType.Matching<T, Return>(this);
+  }
+
+  public final void accept(GenericType.Accepter accepter) {
+    if (this instanceof GenericType.Empty) {
+      accepter.empty((GenericType.Empty<T>) this);
+    }
+    if (this instanceof GenericType.Single) {
+      accepter.single((GenericType.Single<T>) this);
+    }
+    if (this instanceof GenericType.Container) {
+      accepter.container((GenericType.Container<T>) this);
+    }
+    throw new IllegalStateException("Unexpected GenericType subclass encountered.");
+  }
+
+  public GenericType.Accepting accepting() {
+    return new GenericType.Accepting(this);
   }
 
   public <Return> Return matching(Function<GenericType.Empty<T>, Return> empty,
@@ -737,6 +1097,67 @@ public abstract class GenericType<T> {
       }
       else {
         return returnValue;
+      }
+    }
+  }
+
+  public interface Accepter<T> {
+    void empty(GenericType.Empty<T> empty);
+
+    void single(GenericType.Single<T> single);
+
+    void container(GenericType.Container<T> container);
+  }
+
+  public static final class Accepting<T> {
+    private boolean done;
+
+    private GenericType value;
+
+    private Accepting(final GenericType value) {
+      this.value = value;
+    }
+
+    public GenericType.Accepting Empty(final Consumer<GenericType.Empty<T>> fn) {
+      if (this.value instanceof GenericType.Empty) {
+        fn.accept((GenericType.Empty<T>) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public GenericType.Accepting Single(final Consumer<GenericType.Single<T>> fn) {
+      if (this.value instanceof GenericType.Single) {
+        fn.accept((GenericType.Single<T>) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public GenericType.Accepting Container(final Consumer<GenericType.Container<T>> fn) {
+      if (this.value instanceof GenericType.Container) {
+        fn.accept((GenericType.Container<T>) this.value);
+        this.done = true;
+      }
+      return this;
+    }
+
+    public boolean wasAccepted() {
+      return this.done;
+    }
+
+    public void accept() {
+      if (!this.done) {
+        throw new IllegalStateException("Unmatched value: " + this.value);
+      }
+    }
+
+    public void orElse(final Consumer<GenericType> fn) {
+      if (!this.done) {
+        fn.accept(this.value);
+      }
+      else {
+        throw new IllegalStateException("Value already matched: " + this.value);
       }
     }
   }
