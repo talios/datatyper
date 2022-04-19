@@ -5,12 +5,12 @@
   <parent>
     <groupId>com.theoryinpractise.datatyper</groupId>
     <artifactId>datatyper</artifactId>
-    <version>1.1.2-SNAPSHOT</version>
+    <version>1.1.2</version>
   </parent>
 
   <groupId>com.theoryinpractise.datatyper</groupId>
   <artifactId>datatyper-example</artifactId>
-  <version>1.1.2-SNAPSHOT</version>
+  <version>1.1.2</version>
 
   <name>datatyper-example</name>
   <url>http://maven.apache.org</url>
@@ -63,7 +63,7 @@
       <plugin>
         <groupId>com.theoryinpractise.datatyper</groupId>
         <artifactId>datatyper-maven-plugin</artifactId>
-        <version>1.1.2-SNAPSHOT</version>
+        <version>1.1.2</version>
         <executions>
           <execution>
             <id>datatyper</id>

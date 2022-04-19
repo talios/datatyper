@@ -5,12 +5,12 @@
   <parent>
     <groupId>com.theoryinpractise.datatyper</groupId>
     <artifactId>datatyper</artifactId>
-    <version>1.1.2-SNAPSHOT</version>
+    <version>1.1.2</version>
   </parent>
 
   <groupId>com.theoryinpractise.datatyper</groupId>
   <artifactId>datatyper-maven-tile</artifactId>
-  <version>1.1.2-SNAPSHOT</version>
+  <version>1.1.2</version>
   <packaging>tile</packaging>
 
   <name>datatyper-maven-tile</name>
