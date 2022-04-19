@@ -10,7 +10,6 @@
   <name>datatyper</name>
   <description>DataType Generator for java</description>
   <url>http://github.com</url>
-
   <licenses>
     <license>
       <name>Apache License</name>
@@ -26,10 +25,17 @@
     </developer>
   </developers>
 
+  <modules>
+    <module>datatyper-lib</module>
+    <module>datatyper-maven-plugin</module>
+    <module>datatyper-maven-tile</module>
+    <module>datatyper-example</module>
+  </modules>
+
   <scm>
     <developerConnection>scm:git:git@github.com:talios/datatyper.git</developerConnection>
-    <url>http://github.com/talios/datatyper</url>
     <tag>HEAD</tag>
+    <url>http://github.com/talios/datatyper</url>
   </scm>
   <distributionManagement>
     <repository>
@@ -44,22 +50,47 @@
     </snapshotRepository>
   </distributionManagement>
 
-  <modules>
-    <module>datatyper-lib</module>
-    <module>datatyper-maven-plugin</module>
-    <module>datatyper-maven-tile</module>
-    <module>datatyper-example</module>
-  </modules>
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>3.0.0-M6</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.2.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>3.0.0-M1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.2.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>3.0.0-M2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>3.3.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.2.1</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.6.1</version>
+        <version>3.10.1</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -77,14 +108,14 @@
         <executions>
           <execution>
             <id>reformat-sources</id>
-            <configuration>
-              <includeStale>false</includeStale>
-              <style>GOOGLE</style>
-            </configuration>
             <goals>
               <goal>format</goal>
             </goals>
             <phase>process-sources</phase>
+            <configuration>
+              <includeStale>false</includeStale>
+              <style>GOOGLE</style>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -101,39 +132,6 @@
         </configuration>
       </plugin>
     </plugins>
-
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.19.1</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-clean-plugin</artifactId>
-          <version>3.0.0</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-install-plugin</artifactId>
-          <version>2.5.2</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>3.0.1</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.8.2</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-dependency-plugin</artifactId>
-          <version>2.10</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-source-plugin</artifactId>
-          <version>3.0.1</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
   </build>
 
   <profiles>
@@ -150,17 +148,17 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
+            <version>3.0.1</version>
             <configuration>
               <executable>gpg2</executable>
             </configuration>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
-                <phase>verify</phase>
                 <goals>
                   <goal>sign</goal>
                 </goals>
+                <phase>verify</phase>
               </execution>
             </executions>
           </plugin>
@@ -168,5 +166,4 @@
       </build>
     </profile>
   </profiles>
-
 </project>
