@@ -122,8 +122,6 @@ Optional<Integer> length = req.<Integer>matching()
 The generated `Request.Matching` class is somewhat akin to an `Optional` value, the only difference being individual type case methods providing a functional style match expression.
 
 
-----
-
 ## Accepting Values
 
 There are times you simply want to consume a specific value and don't require a result, for this we have a `Request.Accepting` fluent interface:
